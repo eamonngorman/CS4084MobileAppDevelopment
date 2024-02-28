@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "105775618567",
+    "project_id": "cs4084mobileappdevelopment",
+    "storage_bucket": "cs4084mobileappdevelopment.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:105775618567:android:b0de74d8527c1b0845e8a2",
+        "android_client_info": {
+          "package_name": "com.example.cs4084mobileappdevelopment"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCTBqlpfMfrE2lZrRpkOPGUbbCK9bxIi74"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
