@@ -6,4 +6,5 @@
     <item name="btn_register" type="id" />
     <item name="loginNow" type="id"></item>
     <item name="registerNow" type="id"></item>
+    <item name="viewMap" type="id"></item>
 </resources>

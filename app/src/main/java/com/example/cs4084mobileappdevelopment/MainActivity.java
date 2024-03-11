@@ -19,6 +19,8 @@ public class MainActivity extends AppCompatActivity {
     TextView textView;
     FirebaseUser user;
 
+    Button viewMap;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -45,6 +47,16 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(intent);
                 finish();
 
+            }
+        });
+
+        viewMap = findViewById(R.id.viewMap);
+
+        viewMap.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(MainActivity.this, MapsActivity.class);
+                startActivity(intent);
             }
         });
     }
