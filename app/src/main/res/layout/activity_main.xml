@@ -2,10 +2,10 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:orientation="vertical"
-    android:gravity="center"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:gravity="center"
+    android:orientation="vertical"
     tools:context=".MainActivity">
 
     <TextView
@@ -15,16 +15,22 @@
         android:text="Hello World!" />
 
     <Button
-        android:text="@string/logout"
         android:id="@+id/logout"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:text="@string/logout" />
 
     <Button
-        android:text="@string/view_map"
         android:id="@+id/viewMap"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:text="@string/view_map" />
+
+    <Button
+        android:id="@+id/createPost"
+        android:layout_width="128dp"
+        android:layout_height="wrap_content"
+        android:text="@string/create_post" />
 
 
 </LinearLayout>
