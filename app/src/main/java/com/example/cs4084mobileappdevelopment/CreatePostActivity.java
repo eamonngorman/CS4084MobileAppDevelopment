@@ -1,7 +1,6 @@
 package com.example.cs4084mobileappdevelopment;
 
 import android.content.Context;
-import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationManager;
@@ -14,7 +13,6 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -22,14 +20,12 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
-import com.google.android.material.textfield.TextInputEditText;
-import com.google.firebase.auth.AuthResult;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import ch.hsr.geohash.GeoHash;
 
 public class CreatePostActivity extends AppCompatActivity {
 
@@ -130,6 +126,11 @@ public class CreatePostActivity extends AppCompatActivity {
 
         postData.put("latitude", latitude);
         postData.put("longitude", longitude);
+
+        String geohash = GeoHash.geoHashStringWithCharacterPrecision(latitude, longitude, 12);
+
+        postData.put("geoHash", geohash);
+
         // Add document to Firestore collection
         db.collection("messages")
                 .add(postData)
