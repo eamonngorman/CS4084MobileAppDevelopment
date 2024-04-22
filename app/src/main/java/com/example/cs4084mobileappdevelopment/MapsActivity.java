@@ -9,9 +9,13 @@ import android.Manifest;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.FrameLayout;
 import android.widget.Toast;
 
+import com.firebase.geofire.GeoFireUtils;
+import com.firebase.geofire.GeoLocation;
+import com.firebase.geofire.GeoQueryBounds;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdate;
@@ -21,8 +25,21 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.gms.tasks.Tasks;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import ch.hsr.geohash.GeoHash;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
@@ -70,8 +87,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         this.gMap = googleMap;
 
         LatLng myLocation = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
-        this.gMap.addMarker(new MarkerOptions().position(myLocation).title("My Location"));
+        //this.gMap.addMarker(new MarkerOptions().position(myLocation).title("My Location"));
+        queryMessagesNearby(currentLocation.getLatitude(), currentLocation.getLongitude());
+
         this.gMap.moveCamera(CameraUpdateFactory.newLatLng(myLocation));
+
+
+
+
+
     }
 
     @Override
@@ -85,4 +109,101 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
         }
     }
+
+    private void queryMessagesNearby(double currentLatitude, double currentLongitude) {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+        // Log current location
+        Log.d("Firestore", "Current Location - Latitude: " + currentLatitude + ", Longitude: " + currentLongitude);
+
+        // Calculate geohash prefix for the given coordinate
+        GeoLocation center = new GeoLocation(currentLatitude, currentLongitude);
+        final double radiusInM = 10 * 1000;
+
+        // Log radius
+        Log.d("Firestore", "Radius: " + radiusInM + " meters");
+
+        // Get GeoHash query bounds
+        List<GeoQueryBounds> bounds = GeoFireUtils.getGeoHashQueryBounds(center, radiusInM);
+
+        // Log number of bounds
+        Log.d("Firestore", "Number of Bounds: " + bounds.size());
+
+        final List<Task<QuerySnapshot>> tasks = new ArrayList<>();
+        for (GeoQueryBounds b : bounds) {
+            Query q = db.collection("messages")
+                    .orderBy("geoHash")
+                    .startAt(b.startHash)
+                    .endAt(b.endHash);
+
+            // Log the geohash range for this bound
+            Log.d("Firestore", "Geohash Range - Start: " + b.startHash + ", End: " + b.endHash);
+
+            tasks.add(q.get());
+        }
+
+        // Log number of tasks
+        Log.d("Firestore", "Number of Tasks: " + tasks.size());
+
+        // Execute tasks and wait for completion
+        Tasks.whenAllComplete(tasks)
+                .addOnCompleteListener(new OnCompleteListener<List<Task<?>>>() {
+                    @Override
+                    public void onComplete(@NonNull Task<List<Task<?>>> t) {
+                        List<DocumentSnapshot> matchingDocs = new ArrayList<>();
+
+                        for (Task<QuerySnapshot> task : tasks) {
+                            QuerySnapshot snap = task.getResult();
+
+                            // Log number of documents in the snapshot
+                            Log.d("Firestore", "Number of Documents: " + snap.size());
+
+                            for (DocumentSnapshot doc : snap.getDocuments()) {
+                                double lat = doc.getDouble("latitude");
+                                double lng = doc.getDouble("longitude");
+
+                                // Log latitude and longitude of each document
+                                Log.d("Firestore", "Document - Latitude: " + lat + ", Longitude: " + lng);
+
+                                // Calculate distance between document location and center
+                                GeoLocation docLocation = new GeoLocation(lat, lng);
+                                double distanceInM = GeoFireUtils.getDistanceBetween(docLocation, center);
+                                Log.d("Firestore", "Distance from Current Location: " + distanceInM + " meters");
+
+                                // Check if document is within radius
+                                if (distanceInM <= radiusInM) {
+                                    matchingDocs.add(doc);
+                                }
+                            }
+                        }
+
+                        // Log number of matching documents
+                        Log.d("Firestore", "Number of Matching Documents: " + matchingDocs.size());
+
+                        // Process matching documents and add markers to map
+                        for (DocumentSnapshot documentSnapshot : matchingDocs) {
+                            // Retrieve message, latitude, longitude, and timestamp from document
+                            String message = documentSnapshot.getString("message");
+                            double messageLat = documentSnapshot.getDouble("latitude");
+                            double messageLng = documentSnapshot.getDouble("longitude");
+                            long timestamp = documentSnapshot.getLong("timestamp"); // Optional: Retrieve timestamp if needed
+
+                            // Log retrieved values
+                            Log.d("Firestore", "Message: " + message);
+                            Log.d("Firestore", "Latitude: " + messageLat);
+                            Log.d("Firestore", "Longitude: " + messageLng);
+                            Log.d("Firestore", "Timestamp: " + timestamp);
+
+                            // Create LatLng object for message location
+                            LatLng messageLocation = new LatLng(messageLat, messageLng);
+
+                            // Add marker to map with message as label
+                            gMap.addMarker(new MarkerOptions().position(messageLocation).title(message));
+                        }
+                    }
+                });
+    }
+
+
+
 }
