@@ -7,4 +7,5 @@
     <item name="loginNow" type="id"></item>
     <item name="registerNow" type="id"></item>
     <item name="viewMap" type="id"></item>
+    <item name="createPost" type="id"></item>
 </resources>
