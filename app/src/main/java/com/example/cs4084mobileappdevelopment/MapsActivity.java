@@ -90,7 +90,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         //this.gMap.addMarker(new MarkerOptions().position(myLocation).title("My Location"));
         queryMessagesNearby(currentLocation.getLatitude(), currentLocation.getLongitude());
 
-        this.gMap.moveCamera(CameraUpdateFactory.newLatLng(myLocation));
+        this.gMap.moveCamera(CameraUpdateFactory.newLatLngZoom(myLocation, 15));
+        //mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(myLocation, 15));
 
 
 
