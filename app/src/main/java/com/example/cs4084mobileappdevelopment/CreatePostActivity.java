@@ -1,9 +1,6 @@
 package com.example.cs4084mobileappdevelopment;
-
-import android.content.Context;
 import android.content.pm.PackageManager;
 import android.location.Location;
-import android.location.LocationManager;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
@@ -20,6 +17,8 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.HashMap;
@@ -29,10 +28,10 @@ import ch.hsr.geohash.GeoHash;
 
 public class CreatePostActivity extends AppCompatActivity {
 
-
     EditText editTextMessage;
     Button buttonLogin;
 
+    FusedLocationProviderClient fusedLocationProviderClient;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,103 +48,89 @@ public class CreatePostActivity extends AppCompatActivity {
         editTextMessage = findViewById(R.id.editTextMessage);
         buttonLogin = findViewById(R.id.buttonSubmit);
 
-        buttonLogin.setOnClickListener(new View.OnClickListener()
+        // Initialize FusedLocationProviderClient
+        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
 
-        {
-            @Override
-            public void onClick (View v){
-                String message;
-                message = String.valueOf(editTextMessage.getText());
+        buttonLogin.setOnClickListener(v -> {
+            String message = editTextMessage.getText().toString().trim();
 
-                if (TextUtils.isEmpty(message)) {
-                    Toast.makeText(CreatePostActivity.this, "Enter Message", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-
-                postMessageToFirestore(message);
-
+            if (TextUtils.isEmpty(message)) {
+                Toast.makeText(CreatePostActivity.this, "Enter Message", Toast.LENGTH_SHORT).show();
+                return;
             }
 
+            postMessageToFirestore(message);
         });
     }
 
-    FirebaseFirestore db = FirebaseFirestore.getInstance();
+    private void postMessageToFirestore(String message) {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        Map<String, Object> postData = new HashMap<>();
+        postData.put("message", message);
+        postData.put("timestamp", System.currentTimeMillis());
 
-    // Request location permissions
-    private static final int LOCATION_PERMISSION_REQUEST_CODE = 100;
-
-    private void requestLocationPermission() {
+        // Request location permissions
         if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this,
                     new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
                     LOCATION_PERMISSION_REQUEST_CODE);
-        }
-    }
-
-    // Get device coordinates
-    private Location getDeviceCoordinates() {
-        // Check if location permissions are granted
-        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION)
-                == PackageManager.PERMISSION_GRANTED) {
-            LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-            if (locationManager != null) {
-                Location location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-                if (location != null) {
-                    return location;
-                }
-            }
-        }
-        return null; // Return null if location is not available
-    }
-
-
-    // Write data to Firestore
-    private void postMessageToFirestore(String message) {
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
-        // Create a new message document
-        Map<String, Object> postData = new HashMap<>();
-        postData.put("message", message);
-        postData.put("timestamp", System.currentTimeMillis());
-        // Get device coordinates
-
-
-        Location currentLocation = getDeviceCoordinates();
-
-        // Check if currentLocation is null
-        if (currentLocation == null) {
-            // Show toast message
-            Toast.makeText(this, "Unable to retrieve current location", Toast.LENGTH_SHORT).show();
-            // Exit function
             return;
         }
-        // Add coordinates to data
-        double latitude = currentLocation.getLatitude();
-        double longitude = currentLocation.getLongitude();
 
+        // Get device coordinates
+        fusedLocationProviderClient.getLastLocation()
+                .addOnSuccessListener(this, location -> {
+                    if (location != null) {
+                        double latitude = location.getLatitude();
+                        double longitude = location.getLongitude();
+                        postData.put("latitude", latitude);
+                        postData.put("longitude", longitude);
 
-        postData.put("latitude", latitude);
-        postData.put("longitude", longitude);
+                        String geohash = GeoHash.geoHashStringWithCharacterPrecision(latitude, longitude, 12);
+                        postData.put("geoHash", geohash);
 
-        String geohash = GeoHash.geoHashStringWithCharacterPrecision(latitude, longitude, 12);
-
-        postData.put("geoHash", geohash);
-
-        // Add document to Firestore collection
-        db.collection("messages")
-                .add(postData)
-                .addOnSuccessListener(documentReference -> {
-                    // Show toast message for success
-                    Toast.makeText(this, "Message posted to Firestore", Toast.LENGTH_SHORT).show();
+                        // Add document to Firestore collection
+                        db.collection("messages")
+                                .add(postData)
+                                .addOnSuccessListener(documentReference -> {
+                                    // Show toast message for success
+                                    Toast.makeText(this, "Message posted to Firestore", Toast.LENGTH_SHORT).show();
+                                })
+                                .addOnFailureListener(e -> {
+                                    // Show toast message for failure
+                                    Toast.makeText(this, "Error posting message to Firestore", Toast.LENGTH_SHORT).show();
+                                    // Log error
+                                    Log.e("Firestore", "Error posting message to Firestore", e);
+                                });
+                    } else {
+                        Toast.makeText(this, "Unable to retrieve current location", Toast.LENGTH_SHORT).show();
+                    }
                 })
-                .addOnFailureListener(e -> {
-                    // Show toast message for failure
-                    Toast.makeText(this, "Error posting message to Firestore", Toast.LENGTH_SHORT).show();
-                    // Log error
-                    Log.e("Firestore", "Error posting message to Firestore", e);
+                .addOnFailureListener(this, e -> {
+                    Toast.makeText(this, "Failed to get last location: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    Log.e("Location", "Failed to get last location: " + e.getMessage());
                 });
     }
 
+    private static final int LOCATION_PERMISSION_REQUEST_CODE = 100;
 
-
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == LOCATION_PERMISSION_REQUEST_CODE) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // Permission granted, post message to Firestore
+                String message = editTextMessage.getText().toString().trim();
+                if (!TextUtils.isEmpty(message)) {
+                    postMessageToFirestore(message);
+                } else {
+                    Toast.makeText(CreatePostActivity.this, "Enter Message", Toast.LENGTH_SHORT).show();
+                }
+            } else {
+                // Permission denied, show a message to the user
+                Toast.makeText(this, "Location permission denied", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
 }
