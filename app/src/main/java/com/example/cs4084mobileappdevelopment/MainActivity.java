@@ -19,6 +19,10 @@ import com.google.firebase.Firebase;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
+import androidx.fragment.app.FragmentContainerView;
+import com.example.cs4084mobileappdevelopment.TaskbarFragment;
 public class MainActivity extends AppCompatActivity {
 
     @RequiresApi(api = Build.VERSION_CODES.R)
@@ -39,10 +43,6 @@ public class MainActivity extends AppCompatActivity {
 
     Button createPost;
 
-    ImageButton viewMapButton;
-
-    ImageButton createPostButton;
-
     @SuppressLint("WrongViewCast")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,19 +50,25 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             handleWindowInsetsForAndroidRAndAbove();
         } else {
-            // For older versions, make the status bar and navigation bar transparent
+            // For older versions, we need to make the status bar and navigation bar transparent
             getWindow().getDecorView().setSystemUiVisibility(
                     View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION |
                             View.SYSTEM_UI_FLAG_LAYOUT_STABLE
             );
         }
 
+
+
+
+
         auth = FirebaseAuth.getInstance();
-        button = findViewById(R.id.logout);
-        createPost = findViewById(R.id.createPost);
+        // button = findViewById(R.id.logout);
+
         textView = findViewById(R.id.user_details);
         user = auth.getCurrentUser();
 
@@ -74,70 +80,16 @@ public class MainActivity extends AppCompatActivity {
             textView.setText(user.getEmail());
         }
 
-        button.setOnClickListener(new View.OnClickListener(){
-            @Override
-            public void onClick(View view){
-                FirebaseAuth.getInstance().signOut();
-                Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
-                startActivity(intent);
 
-            }
-        });
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
 
-        viewMap = findViewById(R.id.viewMap);
-
-        viewMapButton = findViewById(R.id.mapImgButton);
-
-        createPostButton = findViewById(R.id.createPostBtn);
-
-        viewMap.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(MainActivity.this, MapsActivity.class);
-                startActivity(intent);
-
-            }
-        });
-
-        viewMapButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(MainActivity.this, MapsActivity.class);
-                startActivity(intent);
-            }
-        });
-
-
-
-                    viewMap.setOnClickListener(new View.OnClickListener() {
-                @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(MainActivity.this, MapsActivity.class);
-                startActivity(intent);
-
-            }
-        });
-
-        createPostButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(MainActivity.this, CreatePostActivity.class);
-                startActivity(intent);
-
-            }
-        });
-
-
-        createPost.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(MainActivity.this, CreatePostActivity.class);
-                startActivity(intent);
-
-            }
-        });
-
-
-
+        TaskbarFragment taskbarFragment = new TaskbarFragment();
+        fragmentTransaction.replace(R.id.fragment_container, taskbarFragment);
+        fragmentTransaction.commit();
     }
+
+
+
+
 }
