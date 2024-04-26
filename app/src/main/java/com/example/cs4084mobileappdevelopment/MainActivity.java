@@ -63,9 +63,6 @@ public class MainActivity extends AppCompatActivity {
         }
 
 
-
-
-
         auth = FirebaseAuth.getInstance();
         // button = findViewById(R.id.logout);
 
@@ -82,11 +79,18 @@ public class MainActivity extends AppCompatActivity {
 
 
         FragmentManager fragmentManager = getSupportFragmentManager();
-        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
 
+        // TitleBarFragment
+        FragmentTransaction titleBarTransaction = fragmentManager.beginTransaction();
+        TitleBarFragment titleBarFragment = new TitleBarFragment();
+        titleBarTransaction.replace(R.id.fragment_container, titleBarFragment);
+        titleBarTransaction.commit();
+
+        // TaskbarFragment
+        FragmentTransaction taskbarTransaction = fragmentManager.beginTransaction();
         TaskbarFragment taskbarFragment = new TaskbarFragment();
-        fragmentTransaction.replace(R.id.fragment_container, taskbarFragment);
-        fragmentTransaction.commit();
+        taskbarTransaction.replace(R.id.taskbar_container, taskbarFragment);
+        taskbarTransaction.commit();
     }
 
 
