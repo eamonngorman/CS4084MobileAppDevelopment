@@ -7,7 +7,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageButton;
-import android.widget.TextView;
 
 import androidx.fragment.app.Fragment;
 
@@ -18,7 +17,6 @@ public class TaskbarFragment extends Fragment {
 
     FirebaseAuth auth;
     Button button;
-    TextView textView;
     FirebaseUser user;
 
     Button viewMap;
@@ -35,7 +33,6 @@ public class TaskbarFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_taskbar, container, false);
 
         auth = FirebaseAuth.getInstance();
-        textView = view.findViewById(R.id.user_details);
         user = auth.getCurrentUser();
 
         ImageButton viewMapButton = view.findViewById(R.id.mapImgButton);

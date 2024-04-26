@@ -7,7 +7,6 @@
     android:layout_height="match_parent"
     android:fitsSystemWindows="true">
 
-    <!-- Toolbar at the bottom -->
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
@@ -34,16 +33,6 @@
         app:layout_constraintEnd_toEndOf="parent"/>
 
 
-    <TextView
-        android:id="@+id/user_details"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Hello World!"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="16dp"/>
-
     <ImageButton
         android:id="@+id/createPostBtn"
         android:layout_width="150dp"
@@ -69,6 +58,5 @@
         app:layout_constraintStart_toStartOf="parent"
         android:layout_marginTop="10dp"/>
 
-    <!-- Button for creating a post -->
 
 </androidx.constraintlayout.widget.ConstraintLayout>
