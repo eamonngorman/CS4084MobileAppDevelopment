@@ -1,6 +1,7 @@
 package com.example.cs4084mobileappdevelopment;
 
 import android.content.Intent;
+import android.media.Image;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -27,6 +28,8 @@ public class TaskbarFragment extends Fragment {
 
     ImageButton createPostButton;
 
+    ImageButton homeBtn;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -37,6 +40,7 @@ public class TaskbarFragment extends Fragment {
 
         ImageButton viewMapButton = view.findViewById(R.id.mapImgButton);
         ImageButton createPostButton = view.findViewById(R.id.createPostBtn);
+        ImageButton homeBtn = view.findViewById(R.id.homeBtn);
 
         viewMapButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -53,6 +57,17 @@ public class TaskbarFragment extends Fragment {
                 startActivity(intent);
             }
         });
+
+        homeBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(getActivity(), MainActivity.class);
+                startActivity(intent);
+            }
+        });
+
+
+
 
         return view;
     }
