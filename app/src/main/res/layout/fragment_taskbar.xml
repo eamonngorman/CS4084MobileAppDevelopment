@@ -39,6 +39,7 @@
         android:layout_height="150dp"
         android:background="@null"
         android:scaleType="fitCenter"
+        android:translationZ="20dp"
         app:srcCompat="@drawable/create_post"
         app:layout_constraintTop_toTopOf="@id/toolbar"
         app:layout_constraintBottom_toBottomOf="@id/toolbar"

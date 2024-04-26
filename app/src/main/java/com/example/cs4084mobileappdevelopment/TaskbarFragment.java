@@ -66,6 +66,13 @@ public class TaskbarFragment extends Fragment {
             }
         });
 
+        homeBtn.setImageResource((R.drawable.hamburger));
+        createPostButton.setImageResource((R.drawable.create_post));
+        viewMapButton.setImageResource((R.drawable.map_icon));
+
+
+
+
 
 
 
