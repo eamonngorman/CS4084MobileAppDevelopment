@@ -11,6 +11,7 @@ import androidx.fragment.app.FragmentTransaction;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
 import android.location.Location;
 import android.os.Build;
 import android.os.Bundle;
@@ -31,7 +32,9 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -50,6 +53,23 @@ import java.util.List;
 import ch.hsr.geohash.GeoHash;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
+
+
+    private void drawCircleOnMap(GoogleMap googleMap, LatLng center, double radiusInMeters) {
+
+        // These are hexademical color codes
+        int strokeColor = 0x88FFFF00;
+        int shadeColor = 0x22FFFF00;
+
+        CircleOptions circleOptions = new CircleOptions()
+                .center(center)
+                .radius(radiusInMeters)
+                .fillColor(shadeColor)
+                .strokeColor(strokeColor)
+                .strokeWidth(8);
+
+        googleMap.addCircle(circleOptions);
+    }
 
     @RequiresApi(api = Build.VERSION_CODES.R)
     private void handleWindowInsetsForAndroidRAndAbove() {
@@ -119,6 +139,19 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void onMapReady(@NonNull GoogleMap googleMap) {
         this.gMap = googleMap;
 
+        try {
+
+            boolean success = googleMap.setMapStyle(
+                    MapStyleOptions.loadRawResourceStyle(
+                            this, R.raw.map_style));
+
+            if (!success) {
+                Log.e("MapsActivity", "Style parsing failed.");
+            }
+        } catch (Resources.NotFoundException e) {
+            Log.e("MapsActivity", "Can't find style. Error: ", e);
+        }
+
         LatLng myLocation = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
         //this.gMap.addMarker(new MarkerOptions().position(myLocation).title("My Location"));
         this.gMap.moveCamera(CameraUpdateFactory.newLatLngZoom(myLocation, 15));
@@ -154,8 +187,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         GeoLocation center = new GeoLocation(currentLatitude, currentLongitude);
         final double radiusInM = 10 * 1000;
 
+        drawCircleOnMap((GoogleMap) gMap, new LatLng(currentLatitude, currentLongitude), radiusInM);
+
+
         // Log radius
         Log.d("Firestore", "Radius: " + radiusInM + " meters");
+
 
         // Get GeoHash query bounds
         List<GeoQueryBounds> bounds = GeoFireUtils.getGeoHashQueryBounds(center, radiusInM);
