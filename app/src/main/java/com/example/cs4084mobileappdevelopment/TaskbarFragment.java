@@ -58,7 +58,9 @@ public class TaskbarFragment extends Fragment {
                 CreatePost createPostFragment = new CreatePost();
                 FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
                 FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-                fragmentTransaction.replace(R.id.fragment_container, createPostFragment);
+                fragmentTransaction.replace(R.id.post_container, createPostFragment);
+                // need to replace a different fragment here...
+
                 fragmentTransaction.addToBackStack(null);
                 fragmentTransaction.commit();
             }

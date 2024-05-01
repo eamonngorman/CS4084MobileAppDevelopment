@@ -52,6 +52,15 @@ public class CreatePost extends Fragment {
         editTextMessage = view.findViewById(R.id.editTextMessage);
         buttonLogin = view.findViewById(R.id.buttonSubmit);
         spinnerCategory = view.findViewById(R.id.spinnerCategory);
+        Button buttonCancel = view.findViewById(R.id.buttonCancel);
+
+
+        buttonCancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                getActivity().getSupportFragmentManager().beginTransaction().remove(CreatePost.this).commit();
+            }
+        });
 
         buttonLogin.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -99,6 +108,7 @@ public class CreatePost extends Fragment {
         postData.put("message", message);
         postData.put("category", category);
         postData.put("timestamp", System.currentTimeMillis());
+        postData.put("deleted", false);
 
         Location currentLocation = getDeviceCoordinates();
 

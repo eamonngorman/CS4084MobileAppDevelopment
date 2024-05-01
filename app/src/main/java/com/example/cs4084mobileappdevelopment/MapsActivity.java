@@ -8,11 +8,13 @@ import androidx.fragment.app.FragmentActivity;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.location.Location;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.WindowInsets;
 import android.view.WindowInsetsController;
@@ -31,6 +33,7 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -115,6 +118,21 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void onMapReady(@NonNull GoogleMap googleMap) {
         this.gMap = googleMap;
 
+        try {
+            // Customise the styling of the base map using a JSON object defined
+            // in a raw resource file.
+            boolean success = googleMap.setMapStyle(
+                    MapStyleOptions.loadRawResourceStyle(
+                            this, R.raw.map_style));
+
+            if (!success) {
+                Log.e("MapsActivity", "Style parsing failed.");
+            }
+        } catch (Resources.NotFoundException e) {
+            Log.e("MapsActivity", "Style parsing failed, cannot find style.");
+
+        }
+
         LatLng myLocation = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
         //this.gMap.addMarker(new MarkerOptions().position(myLocation).title("My Location"));
         this.gMap.moveCamera(CameraUpdateFactory.newLatLngZoom(myLocation, 15));
@@ -148,22 +166,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private void queryMessagesNearby(double currentLatitude, double currentLongitude) {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
 
-
-        // We need to use this method to clear firestore cache, when messages are deleted they are still shown on the map without this method
-        db.clearPersistence()
-                .addOnSuccessListener(new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void aVoid) {
-                        Toast.makeText(MapsActivity.this, "Firestore cache cleared", Toast.LENGTH_SHORT).show();
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Toast.makeText(MapsActivity.this, "Error clearing Firestore cache", Toast.LENGTH_SHORT).show();
-                    }
-                });
-
         GeoLocation center = new GeoLocation(currentLatitude, currentLongitude);
         final double radiusInM = 10 * 1000;
         List<GeoQueryBounds> bounds = GeoFireUtils.getGeoHashQueryBounds(center, radiusInM);
@@ -171,6 +173,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         final List<Task<QuerySnapshot>> tasks = new ArrayList<>();
         for (GeoQueryBounds b : bounds) {
             Query q = db.collection("messages")
+                    .whereEqualTo("deleted", false)
                     .orderBy("geoHash")
                     .startAt(b.startHash)
                     .endAt(b.endHash);
