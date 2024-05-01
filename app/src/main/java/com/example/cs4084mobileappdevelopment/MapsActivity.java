@@ -173,7 +173,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         final List<Task<QuerySnapshot>> tasks = new ArrayList<>();
         for (GeoQueryBounds b : bounds) {
             Query q = db.collection("messages")
-                    .whereEqualTo("deleted", false)
                     .orderBy("geoHash")
                     .startAt(b.startHash)
                     .endAt(b.endHash);
