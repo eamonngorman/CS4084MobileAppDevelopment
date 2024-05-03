@@ -6,6 +6,25 @@
     android:layout_height="match_parent"
     android:fitsSystemWindows="true">
 
+    <LinearLayout
+        android:id="@+id/header"
+        android:layout_width="wrap_content"
+        android:layout_height="100dp"
+        android:padding="20dp"
+        android:background="@drawable/titlebar"
+        android:gravity="bottom"
+        android:orientation="vertical"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <include
+            layout="@layout/header"
+
+            />
+
+    </LinearLayout>
+
     <TextView
         android:id="@+id/user_details"
         android:layout_width="wrap_content"
