@@ -20,6 +20,8 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.HashMap;
@@ -109,6 +111,15 @@ public class CreatePost extends Fragment {
         postData.put("category", category);
         postData.put("timestamp", System.currentTimeMillis());
         postData.put("deleted", false);
+
+        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+        if (currentUser != null) {
+            String userId = currentUser.getUid();
+            postData.put("userId", userId);
+        } else {
+            Toast.makeText(getActivity(), "No user is currently signed in", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
         Location currentLocation = getDeviceCoordinates();
 
