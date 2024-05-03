@@ -144,8 +144,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     String city = addresses.get(0).getLocality();
                     String country = addresses.get(0).getCountryName();
                     String location = city + ", " + country;
+                    String postId = documentSnapshot.getId();
 
-                    MapMessageFragment newFragment = MapMessageFragment.newInstance(markerTitle, markerMessage, timestamp, location);
+                    MapMessageFragment newFragment = MapMessageFragment.newInstance(markerTitle, markerMessage, timestamp, location, postId);
 
                     getSupportFragmentManager().beginTransaction()
                             .replace(R.id.message_container, newFragment)
@@ -160,8 +161,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         });
 
         try {
-            // Customise the styling of the base map using a JSON object defined
-            // in a raw resource file.
             boolean success = googleMap.setMapStyle(
                     MapStyleOptions.loadRawResourceStyle(
                             this, R.raw.map_style));

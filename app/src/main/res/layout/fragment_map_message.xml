@@ -78,7 +78,7 @@
                 android:src="@drawable/arrow_upward" />
 
             <TextView
-                android:id="@+id/UpvoteCounter"
+                android:id="@+id/UpvoteCount"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:text="0" />

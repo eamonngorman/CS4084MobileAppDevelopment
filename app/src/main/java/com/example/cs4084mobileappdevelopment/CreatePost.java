@@ -20,8 +20,10 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.HashMap;
@@ -140,9 +142,29 @@ public class CreatePost extends Fragment {
 
         db.collection("messages")
                 .add(postData)
-                .addOnSuccessListener(documentReference -> {
-                    Toast.makeText(getActivity(), "Message posted to Firestore", Toast.LENGTH_SHORT).show();
-                })
+                .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                    @Override
+                    public void onSuccess(DocumentReference documentReference) {
+                        Toast.makeText(getActivity(), "Message posted to Firestore", Toast.LENGTH_SHORT).show();
+
+                        Map<String, Object> initialVoteCount = new HashMap<>();
+                        initialVoteCount.put("postId", documentReference.getId());
+                        initialVoteCount.put("count", 0);
+
+                        Log.i("Firestore", "Document ID: " + documentReference.getId());
+
+                        db.collection("upvotes").document(documentReference.getId()).set(initialVoteCount)
+                                .addOnFailureListener(e -> {
+                                    Log.e("Firestore", "Error creating document in upvotes collection", e);
+                                });
+
+                        db.collection("downvotes").document(documentReference.getId()).set(initialVoteCount)
+                                .addOnFailureListener(e -> {
+                                    Log.e("Firestore", "Error creating document in downvotes collection", e);
+                                });
+                    }
+
+    })
                 .addOnFailureListener(e -> {
                     Toast.makeText(getActivity(), "Error posting message to Firestore", Toast.LENGTH_SHORT).show();
                     Log.e("Firestore", "Error posting message to Firestore", e);
