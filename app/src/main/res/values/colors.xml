@@ -5,4 +5,9 @@
     <color name= "Paynegray">#415F75</color>
     <color name= "paleazure">#70CFFD</color>
     <color name= "toolbar">#E2E9DD</color>
+    <color name= "map_green"> #8FB1A3 </color>
+    <color name= "map_blue"> #7ECBF5 </color>
+    <color name= "map_yellow"> #F9F3E3 </color>
+    <color name= "map_border"> #13363C </color>
+    <color name= "map_road"> #09475C </color>
 </resources>
