@@ -29,6 +29,10 @@ public class ProfileFragment extends Fragment {
     RecyclerView postsRecyclerView;
     RecyclerView.Adapter adapter;
     List<String> messagesList;
+    List<String> messageIds;
+    long upvotes = 0;
+    long downvotes = 0;
+    long totalVotes = 0;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -43,15 +47,17 @@ public class ProfileFragment extends Fragment {
                 }
             }
         });
-        TextView textView = view.findViewById(R.id.user_details);
+        TextView emailTextView = view.findViewById(R.id.user_details);
+        TextView votesTextView = view.findViewById(R.id.upvotes);
         postsRecyclerView = view.findViewById(R.id.messageRecycler);
 
         auth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
         user = auth.getCurrentUser();
-        textView.setText(user.getEmail());
+        emailTextView.setText(user.getEmail());
 
         messagesList = new ArrayList<>();
+        messageIds = new ArrayList<>();
         class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageViewHolder> {
             private List<String> messagesList;
 
@@ -99,14 +105,51 @@ public class ProfileFragment extends Fragment {
                         for (QueryDocumentSnapshot document : task.getResult()) {
                             String message = document.getString("message");
                             messagesList.add(message);
+                            messageIds.add(document.getId());
                         }
                         adapter.notifyDataSetChanged();
                         Log.d("ProfileFragment", "userID: " + user.getUid());
                         Log.d("ProfileFragment", "messagesList: " + messagesList);
+                        Log.d("ProfileFragment", "messageIds: " + messageIds);
+
+                        for (String messageId : messageIds) {
+                            Log.d("ProfileFragment", "messageId: " + messageId);
+                            db.collection("upvotes")
+                                    .whereEqualTo("postId", messageId)
+                                    .get()
+                                    .addOnCompleteListener(task1 -> {
+                                        if (task1.isSuccessful()) {
+                                            for (QueryDocumentSnapshot document : task1.getResult()) {
+                                                totalVotes += document.getLong("count");
+                                                Log.d("ProfileFragment", "upvotes: " + upvotes);
+                                            }
+
+                                        } else {
+                                            Log.d("ProfileFragment", "Error getting upvotes");
+                                        }
+                                    });
+
+                            db.collection("downvotes")
+                                    .whereEqualTo("postId", messageId)
+                                    .get()
+                                    .addOnCompleteListener(task2 -> {
+                                        if (task2.isSuccessful()) {
+                                            for (QueryDocumentSnapshot document : task2.getResult()) {
+                                                totalVotes -= document.getLong("count");
+                                                Log.d("ProfileFragment", "downvotes: " + downvotes);
+                                            }
+                                        } else {
+                                            Log.d("ProfileFragment", "Error getting downvotes");
+                                        }
+                                        votesTextView.setText("Total Votes: " + totalVotes);
+                                    });
+
+                        }
                     } else {
                         // Handle any errors
                     }
                 });
+
 
         return view;
     }
