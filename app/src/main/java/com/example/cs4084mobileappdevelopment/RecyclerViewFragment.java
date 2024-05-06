@@ -63,7 +63,7 @@ public class RecyclerViewFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_recycler_view, container, false);
         recyclerView = view.findViewById(R.id.recycler_view);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        adapter = new MessageAdapter();
+        adapter = new MessageAdapter(requireContext());
         recyclerView.setAdapter(adapter);
 
         getLastLocation();
