@@ -7,10 +7,10 @@
         android:layout_width="224dp"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
-        android:orientation="vertical"
-        android:padding="25dp"
         android:background="@drawable/rounded_bg"
-        android:elevation="10dp">
+        android:elevation="10dp"
+        android:orientation="vertical"
+        android:padding="25dp">
 
 
         <Spinner
@@ -18,8 +18,8 @@
             android:layout_width="match_parent"
             android:layout_height="48dp"
             android:background="@color/white"
-            android:padding="5dp"
-            android:entries="@array/categories" />
+            android:entries="@array/categories"
+            android:padding="5dp" />
 
         <EditText
             android:id="@+id/editTextMessage"
@@ -27,10 +27,10 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
             android:background="@color/white"
-            android:padding="10dp"
             android:hint="Enter your post"
             android:inputType="textMultiLine"
-            android:minHeight="48dp" />
+            android:minHeight="48dp"
+            android:padding="10dp" />
 
         <Button
             android:id="@+id/buttonSubmit"
