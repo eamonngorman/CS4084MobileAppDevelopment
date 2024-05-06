@@ -77,6 +77,13 @@ public class MainActivity extends AppCompatActivity {
                             startActivity(intent);
                             finish();
                             return true;
+                        } else if (item.getItemId() == R.id.profile) {
+                            ProfileFragment profileFragment = new ProfileFragment();
+                            FragmentManager fragmentManager = getSupportFragmentManager();
+                            FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+                            fragmentTransaction.replace(R.id.fragment_container, profileFragment);
+                            fragmentTransaction.commit();
+                            return true;
                         }
                         return false;
                     }
