@@ -43,20 +43,13 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    FirebaseAuth auth;
-    Button button;
-    TextView textView;
-    FirebaseUser user;
-
-
-    Button viewMap;
-
-    Button createPost;
+    private FirebaseAuth auth;
+    private TextView textView;
+    private FirebaseUser user;
 
     @SuppressLint("WrongViewCast")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        // This is some stuff that will make it so that we can use the entire screen of the phone, removing gesture navigate
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
@@ -96,10 +89,7 @@ public class MainActivity extends AppCompatActivity {
             );
         }
 
-
         auth = FirebaseAuth.getInstance();
-        // button = findViewById(R.id.logout);
-
         textView = findViewById(R.id.user_details);
         user = auth.getCurrentUser();
 
@@ -111,16 +101,17 @@ public class MainActivity extends AppCompatActivity {
             textView.setText(user.getEmail());
         }
 
-
+        // Load Taskbar Fragment
         FragmentManager fragmentManager = getSupportFragmentManager();
-
-
         FragmentTransaction taskbarTransaction = fragmentManager.beginTransaction();
         TaskbarFragment taskbarFragment = new TaskbarFragment();
         taskbarTransaction.replace(R.id.taskbar_container, taskbarFragment);
         taskbarTransaction.commit();
 
-
+        // Load RecyclerView Fragment
+        FragmentTransaction recyclerViewTransaction = fragmentManager.beginTransaction();
+        RecyclerViewFragment recyclerViewFragment = new RecyclerViewFragment();
+        recyclerViewTransaction.replace(R.id.recycler_view_container, recyclerViewFragment);
+        recyclerViewTransaction.commit();
     }
-
 }
