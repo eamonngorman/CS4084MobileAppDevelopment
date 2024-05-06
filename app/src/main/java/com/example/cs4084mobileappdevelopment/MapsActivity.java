@@ -1,15 +1,25 @@
 package com.example.cs4084mobileappdevelopment;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
+import androidx.annotation.RequiresApi;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.FragmentActivity;
 
+
 import android.Manifest;
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.view.WindowInsets;
+import android.view.WindowInsetsController;
 import android.widget.FrameLayout;
 import android.widget.Toast;
 
@@ -18,30 +28,41 @@ import com.firebase.geofire.GeoLocation;
 import com.firebase.geofire.GeoQueryBounds;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptor;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MapStyleOptions;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
-import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-
-import ch.hsr.geohash.GeoHash;
+import java.util.Locale;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
+
+    @RequiresApi(api = Build.VERSION_CODES.R)
+    private void handleWindowInsetsForAndroidRAndAbove() {
+        final WindowInsetsController insetsController = getWindow().getInsetsController();
+        if (insetsController != null) {
+            insetsController.hide(WindowInsets.Type.statusBars() | WindowInsets.Type.navigationBars());
+            insetsController.setSystemBarsBehavior(WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
+        }
+    }
 
     private final int FINE_PERMISSION_CODE = 1;
     GoogleMap gMap;
@@ -59,6 +80,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
         getLastLocation();
 
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            handleWindowInsetsForAndroidRAndAbove();
+        } else {
+            // For older versions, we need to make the status bar and navigation bar transparent
+            getWindow().getDecorView().setSystemUiVisibility(
+                    View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION |
+                            View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+            );
+        }
 
     }
 
@@ -77,6 +107,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
                     SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
                     mapFragment.getMapAsync(MapsActivity.this);
+
                 }
             }
         });
@@ -86,16 +117,72 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void onMapReady(@NonNull GoogleMap googleMap) {
         this.gMap = googleMap;
 
+
+        // Marker onclick listener
+
+        gMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+            @Override
+            public boolean onMarkerClick(Marker marker) {
+                DocumentSnapshot documentSnapshot = (DocumentSnapshot) marker.getTag();
+
+                if (documentSnapshot != null) {
+                    String markerTitle = "Post";
+                    String markerMessage= documentSnapshot.getString("message");
+                    long timestamp = documentSnapshot.getLong("timestamp");
+                    double lat = documentSnapshot.getDouble("latitude");
+                    double lng = documentSnapshot.getDouble("longitude");
+
+
+                    Geocoder geocoder = new Geocoder(MapsActivity.this, Locale.getDefault());
+                    List<Address> addresses = null;
+                    try {
+                        addresses = geocoder.getFromLocation(lat, lng, 1);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
+                    String city = addresses.get(0).getLocality();
+                    String country = addresses.get(0).getCountryName();
+                    String location = city + ", " + country;
+                    String postId = documentSnapshot.getId();
+
+                    MapMessageFragment newFragment = MapMessageFragment.newInstance(markerTitle, markerMessage, timestamp, location, postId);
+
+                    getSupportFragmentManager().beginTransaction()
+                            .replace(R.id.message_container, newFragment)
+                            .commit();
+                } else {
+                    // Handle the case where the DocumentSnapshot is null
+                    Log.e("MapsActivity", "No DocumentSnapshot associated with this marker.");
+                }
+
+                return true;
+            }
+        });
+
+        try {
+            boolean success = googleMap.setMapStyle(
+                    MapStyleOptions.loadRawResourceStyle(
+                            this, R.raw.map_style));
+
+            if (!success) {
+                Log.e("MapsActivity", "Style parsing failed.");
+            }
+        } catch (Resources.NotFoundException e) {
+            Log.e("MapsActivity", "Style parsing failed, cannot find style.");
+
+        }
+
         LatLng myLocation = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
         //this.gMap.addMarker(new MarkerOptions().position(myLocation).title("My Location"));
+        this.gMap.moveCamera(CameraUpdateFactory.newLatLngZoom(myLocation, 15));
         queryMessagesNearby(currentLocation.getLatitude(), currentLocation.getLongitude());
 
-        this.gMap.moveCamera(CameraUpdateFactory.newLatLngZoom(myLocation, 15));
-        //mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(myLocation, 15));
 
-
-
-
+        TaskbarFragment taskbarFragment = new TaskbarFragment();
+        getSupportFragmentManager().beginTransaction()
+                .add(R.id.fragment_container, taskbarFragment)
+                .commit();
 
     }
 
@@ -103,7 +190,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == FINE_PERMISSION_CODE) {
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 getLastLocation();
             } else {
                 Toast.makeText(this, "Location permission is denied, please allow the permission", Toast.LENGTH_SHORT).show();
@@ -111,24 +198,17 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
     }
 
+    private BitmapDescriptor getMarkerIcon(int drawableRes) {
+        Bitmap bitmap = BitmapFactory.decodeResource(getResources(), drawableRes);
+        return BitmapDescriptorFactory.fromBitmap(bitmap);
+    }
+
     private void queryMessagesNearby(double currentLatitude, double currentLongitude) {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
 
-        // Log current location
-        Log.d("Firestore", "Current Location - Latitude: " + currentLatitude + ", Longitude: " + currentLongitude);
-
-        // Calculate geohash prefix for the given coordinate
         GeoLocation center = new GeoLocation(currentLatitude, currentLongitude);
         final double radiusInM = 10 * 1000;
-
-        // Log radius
-        Log.d("Firestore", "Radius: " + radiusInM + " meters");
-
-        // Get GeoHash query bounds
         List<GeoQueryBounds> bounds = GeoFireUtils.getGeoHashQueryBounds(center, radiusInM);
-
-        // Log number of bounds
-        Log.d("Firestore", "Number of Bounds: " + bounds.size());
 
         final List<Task<QuerySnapshot>> tasks = new ArrayList<>();
         for (GeoQueryBounds b : bounds) {
@@ -137,16 +217,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     .startAt(b.startHash)
                     .endAt(b.endHash);
 
-            // Log the geohash range for this bound
-            Log.d("Firestore", "Geohash Range - Start: " + b.startHash + ", End: " + b.endHash);
-
             tasks.add(q.get());
         }
 
-        // Log number of tasks
-        Log.d("Firestore", "Number of Tasks: " + tasks.size());
-
-        // Execute tasks and wait for completion
         Tasks.whenAllComplete(tasks)
                 .addOnCompleteListener(new OnCompleteListener<List<Task<?>>>() {
                     @Override
@@ -156,50 +229,60 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         for (Task<QuerySnapshot> task : tasks) {
                             QuerySnapshot snap = task.getResult();
 
-                            // Log number of documents in the snapshot
-                            Log.d("Firestore", "Number of Documents: " + snap.size());
-
                             for (DocumentSnapshot doc : snap.getDocuments()) {
                                 double lat = doc.getDouble("latitude");
                                 double lng = doc.getDouble("longitude");
 
-                                // Log latitude and longitude of each document
-                                Log.d("Firestore", "Document - Latitude: " + lat + ", Longitude: " + lng);
-
-                                // Calculate distance between document location and center
                                 GeoLocation docLocation = new GeoLocation(lat, lng);
                                 double distanceInM = GeoFireUtils.getDistanceBetween(docLocation, center);
-                                Log.d("Firestore", "Distance from Current Location: " + distanceInM + " meters");
 
-                                // Check if document is within radius
                                 if (distanceInM <= radiusInM) {
                                     matchingDocs.add(doc);
                                 }
                             }
                         }
 
-                        // Log number of matching documents
-                        Log.d("Firestore", "Number of Matching Documents: " + matchingDocs.size());
-
-                        // Process matching documents and add markers to map
                         for (DocumentSnapshot documentSnapshot : matchingDocs) {
-                            // Retrieve message, latitude, longitude, and timestamp from document
                             String message = documentSnapshot.getString("message");
+                            String category = documentSnapshot.getString("category");
                             double messageLat = documentSnapshot.getDouble("latitude");
                             double messageLng = documentSnapshot.getDouble("longitude");
-                            long timestamp = documentSnapshot.getLong("timestamp"); // Optional: Retrieve timestamp if needed
 
-                            // Log retrieved values
-                            Log.d("Firestore", "Message: " + message);
-                            Log.d("Firestore", "Latitude: " + messageLat);
-                            Log.d("Firestore", "Longitude: " + messageLng);
-                            Log.d("Firestore", "Timestamp: " + timestamp);
-
-                            // Create LatLng object for message location
                             LatLng messageLocation = new LatLng(messageLat, messageLng);
 
-                            // Add marker to map with message as label
-                            gMap.addMarker(new MarkerOptions().position(messageLocation).title(message));
+                            MarkerOptions markerOptions = new MarkerOptions().position(messageLocation).title(message);
+
+                            if (category != null) {
+                                int iconResId = 0;
+                                switch (category) {
+                                    case "General":
+                                        iconResId = R.drawable.small_info;
+                                        break;
+                                    case "Traffic alert":
+                                        iconResId = R.drawable.small_traffic;
+                                        break;
+                                    case "Event":
+                                        iconResId = R.drawable.small_meetup;
+                                        break;
+                                    case "Question":
+                                        iconResId = R.drawable.small_question;
+                                        break;
+                                    case "Safety notice":
+                                        iconResId = R.drawable.small_danger;
+                                        break;
+                                    case "null":
+                                        iconResId = R.drawable.small_info;
+                                        break;
+                                }
+
+                                if (iconResId != 0) {
+                                    markerOptions.icon(getMarkerIcon(iconResId));
+                                }
+                            }
+
+                            // Create the marker and attach the DocumentSnapshot object to it
+                            Marker marker = gMap.addMarker(markerOptions);
+                            marker.setTag(documentSnapshot);
                         }
                     }
                 });
