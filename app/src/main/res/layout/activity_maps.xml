@@ -23,4 +23,10 @@
         android:layout_height="wrap_content"
         android:layout_centerInParent="true" />
 
+    <androidx.fragment.app.FragmentContainerView
+        android:id="@+id/message_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true" />
+
 </RelativeLayout>

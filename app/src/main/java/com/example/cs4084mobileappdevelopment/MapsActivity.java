@@ -11,6 +11,8 @@ import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
 import android.os.Build;
 import android.os.Bundle;
@@ -34,6 +36,7 @@ import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MapStyleOptions;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -45,8 +48,10 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
@@ -85,13 +90,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             );
         }
 
-
-        //FragmentManager fragmentManager = getSupportFragmentManager();
-        // fragmentTransaction = fragmentManager.beginTransaction();
-
-        // taskbarFragment = new TaskbarFragment();
-        //fragmentTransaction.replace(R.id.fragment_container, taskbarFragment);
-        //fragmentTransaction.commit();
     }
 
     private void getLastLocation() {
@@ -119,9 +117,50 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void onMapReady(@NonNull GoogleMap googleMap) {
         this.gMap = googleMap;
 
+
+        // Marker onclick listener
+
+        gMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+            @Override
+            public boolean onMarkerClick(Marker marker) {
+                DocumentSnapshot documentSnapshot = (DocumentSnapshot) marker.getTag();
+
+                if (documentSnapshot != null) {
+                    String markerTitle = "Post";
+                    String markerMessage= documentSnapshot.getString("message");
+                    long timestamp = documentSnapshot.getLong("timestamp");
+                    double lat = documentSnapshot.getDouble("latitude");
+                    double lng = documentSnapshot.getDouble("longitude");
+
+
+                    Geocoder geocoder = new Geocoder(MapsActivity.this, Locale.getDefault());
+                    List<Address> addresses = null;
+                    try {
+                        addresses = geocoder.getFromLocation(lat, lng, 1);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
+                    String city = addresses.get(0).getLocality();
+                    String country = addresses.get(0).getCountryName();
+                    String location = city + ", " + country;
+                    String postId = documentSnapshot.getId();
+
+                    MapMessageFragment newFragment = MapMessageFragment.newInstance(markerTitle, markerMessage, timestamp, location, postId);
+
+                    getSupportFragmentManager().beginTransaction()
+                            .replace(R.id.message_container, newFragment)
+                            .commit();
+                } else {
+                    // Handle the case where the DocumentSnapshot is null
+                    Log.e("MapsActivity", "No DocumentSnapshot associated with this marker.");
+                }
+
+                return true;
+            }
+        });
+
         try {
-            // Customise the styling of the base map using a JSON object defined
-            // in a raw resource file.
             boolean success = googleMap.setMapStyle(
                     MapStyleOptions.loadRawResourceStyle(
                             this, R.raw.map_style));
@@ -241,7 +280,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                 }
                             }
 
-                            gMap.addMarker(markerOptions);
+                            // Create the marker and attach the DocumentSnapshot object to it
+                            Marker marker = gMap.addMarker(markerOptions);
+                            marker.setTag(documentSnapshot);
                         }
                     }
                 });
