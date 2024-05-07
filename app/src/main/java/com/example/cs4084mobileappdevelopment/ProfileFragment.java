@@ -30,9 +30,23 @@ public class ProfileFragment extends Fragment {
     RecyclerView.Adapter adapter;
     List<String> messagesList;
     List<String> messageIds;
+    List<String> categoriesList;
+    List<String> timeList;
+    long currentTime = System.currentTimeMillis();
     long upvotes = 0;
     long downvotes = 0;
     long totalVotes = 0;
+    private String getTimeAgo(long timeDifference){
+        if (timeDifference < 60000) {
+            return "just now";
+        } else if (timeDifference < 3600000) {
+            return (timeDifference / 60000) + " minutes ago";
+        } else if (timeDifference < 86400000) {
+            return (timeDifference / 3600000) + " hours ago";
+        } else {
+            return (timeDifference / 86400000) + " days ago";
+        }
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -58,11 +72,17 @@ public class ProfileFragment extends Fragment {
 
         messagesList = new ArrayList<>();
         messageIds = new ArrayList<>();
+        categoriesList = new ArrayList<>();
+        timeList = new ArrayList<>();
         class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageViewHolder> {
             private List<String> messagesList;
+            private List<String> categoriesList;
+            private List<String> timeList;
 
-            MessageAdapter(List<String> messagesList) {
+            MessageAdapter(List<String> messagesList, List<String> categoriesList, List<String> timeList) {
                 this.messagesList = messagesList;
+                this.categoriesList = categoriesList;
+                this.timeList = timeList;
             }
 
             @NonNull
@@ -76,7 +96,11 @@ public class ProfileFragment extends Fragment {
             @Override
             public void onBindViewHolder(@NonNull MessageViewHolder holder, int position) {
                 String message = messagesList.get(position);
+                String category = categoriesList.get(position);
+                String time = timeList.get(position);
                 holder.messageTextView.setText(message);
+                holder.categoryTextView.setText(category);
+                holder.timeTextView.setText(time);
             }
 
             @Override
@@ -86,16 +110,22 @@ public class ProfileFragment extends Fragment {
 
             class MessageViewHolder extends RecyclerView.ViewHolder {
                 TextView messageTextView;
+                TextView categoryTextView;
+                TextView timeTextView;
 
                 MessageViewHolder(View view) {
                     super(view);
                     messageTextView = view.findViewById(R.id.messageText);
+                    categoryTextView = view.findViewById(R.id.categoryText);
+                    timeTextView = view.findViewById(R.id.timeText);
                 }
             }
         }
-        adapter = new MessageAdapter(messagesList);
+
+        adapter = new MessageAdapter(messagesList, categoriesList, timeList);
         postsRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         postsRecyclerView.setAdapter(adapter);
+
 
         db.collection("messages")
                 .whereEqualTo("userId", user.getUid())
@@ -104,8 +134,14 @@ public class ProfileFragment extends Fragment {
                     if (task.isSuccessful()) {
                         for (QueryDocumentSnapshot document : task.getResult()) {
                             String message = document.getString("message");
+                            String category = document.getString("category");
+                            long timestamp = document.getLong("timestamp");
+                            String time = getTimeAgo(currentTime - timestamp);
+
                             messagesList.add(message);
                             messageIds.add(document.getId());
+                            categoriesList.add(category);
+                            timeList.add(time);
                         }
                         adapter.notifyDataSetChanged();
                         Log.d("ProfileFragment", "userID: " + user.getUid());
@@ -148,7 +184,9 @@ public class ProfileFragment extends Fragment {
                     } else {
                         // Handle any errors
                     }
+
                 });
+
 
 
         return view;
