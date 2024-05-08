@@ -58,14 +58,15 @@
         <Button
 
             android:id="@id/btn_login"
+            style="@style/buttonStyle"
             android:layout_width="100dp"
             android:layout_height="wrap_content"
-            android:padding="10dp"
-            android:gravity="center"
-            android:text="@string/login"
             android:layout_gravity="center_horizontal"
             android:layout_marginTop="20dp"
-        />
+            android:gravity="center"
+            android:padding="10dp"
+            android:text="@string/login"
+            android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
 
         <TextView
             android:id="@id/registerNow"
