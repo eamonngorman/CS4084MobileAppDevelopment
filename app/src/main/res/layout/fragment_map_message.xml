@@ -110,11 +110,11 @@
             />
 
         <Button
-            android:id="@+id/comment_button"
+            android:id="@+id/view_comment_button"
             android:layout_width="150dp"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:text="Post Comment" />
+            android:text="View Comments" />
 
     </LinearLayout>
 

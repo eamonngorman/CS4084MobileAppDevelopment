@@ -29,6 +29,8 @@ public class PostCommentFragment extends Fragment {
 
     private EditText commentEditText;
     private Button postCommentButton;
+    private Button closeButton;
+
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
     private String postId;
 
@@ -52,6 +54,8 @@ public class PostCommentFragment extends Fragment {
 
         commentEditText = view.findViewById(R.id.comment_edit_text);
         postCommentButton = view.findViewById(R.id.comment_button);
+        closeButton = view.findViewById(R.id.close_comment_post);
+
 
         postCommentButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -61,6 +65,15 @@ public class PostCommentFragment extends Fragment {
 //                String postId = getArguments().getString("postId");
 
                 CommentHandler.postComment(commentText, postId);
+            }
+        });
+
+        closeButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (getFragmentManager() != null) {
+                    getFragmentManager().beginTransaction().remove(PostCommentFragment.this).commit();
+                }
             }
         });
 

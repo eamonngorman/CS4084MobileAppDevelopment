@@ -74,7 +74,7 @@ public class MapMessageFragment extends Fragment {
         ImageButton upvoteButton = view.findViewById(R.id.upvoteBtn);
         ImageButton downvoteButton = view.findViewById(R.id.downvoteBtn);
         Button closeButton = view.findViewById(R.id.CloseBtn);
-        Button commentButton = view.findViewById(R.id.comment_button);
+        Button commentButton = view.findViewById(R.id.view_comment_button);
 
         updateVotes(upvoteRef, UpvoteCount);
         updateVotes(downvoteRef, DownvoteCount);
@@ -162,11 +162,28 @@ public class MapMessageFragment extends Fragment {
             @Override
             public void onClick(View v) {
 
-                PostCommentFragment commentFragment = new PostCommentFragment(postRef);
+                ViewCommentsFragment viewCommentFragment = new ViewCommentsFragment();
+//                ViewCommentsFragment commentFragment = new ViewCommentsFragment(postRef);
                 FragmentManager fragmentManager = getParentFragmentManager();
                 FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-                fragmentTransaction.replace(R.id.fragment_container, commentFragment);
+                fragmentTransaction.add(R.id.fragment_container, viewCommentFragment);
                 fragmentTransaction.commit();
+
+
+//                PostCommentFragment commentFragment = new PostCommentFragment(postRef);
+//        FragmentManager fragmentManager = getParentFragmentManager();
+//        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+//        fragmentTransaction.add(R.id.message_container, commentFragment);
+//        fragmentTransaction.commit();
+//
+////                PostCommentFragment commentFragment = new PostCommentFragment(postRef);
+////
+////                getSupportFragmentManager().beginTransaction()
+////                        .replace(R.id.message_container, commentFragment)
+////                        .commit();
+
+
+
             }
         });
 
