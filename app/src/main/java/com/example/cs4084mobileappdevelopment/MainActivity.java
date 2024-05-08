@@ -21,12 +21,14 @@ import com.google.android.gms.location.LocationRequest;
 import com.google.firebase.Firebase;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.fragment.app.FragmentContainerView;
 
 import com.example.cs4084mobileappdevelopment.TaskbarFragment;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import android.view.Menu;
 import android.view.MenuItem;
@@ -120,5 +122,22 @@ public class MainActivity extends AppCompatActivity {
         RecyclerViewFragment recyclerViewFragment = new RecyclerViewFragment();
         recyclerViewTransaction.replace(R.id.recycler_view_container, recyclerViewFragment);
         recyclerViewTransaction.commit();
+
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        db.collection("messages")
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        for (QueryDocumentSnapshot document : task.getResult()) {
+
+                            long timestamp = document.getLong("timestamp");
+                            long currentTime = System.currentTimeMillis();
+                            long timeDifference = currentTime - timestamp;
+                            if (timeDifference > 7 * 24 * 60 * 60 * 1000) {
+                                document.getReference().update("deleted", true);
+                            }
+                        }
+                    }
+                });
     }
 }
