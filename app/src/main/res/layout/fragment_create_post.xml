@@ -34,16 +34,21 @@
 
         <Button
             android:id="@+id/buttonSubmit"
+            style="@style/buttonStyle"
             android:layout_width="match_parent"
             android:layout_height="50dp"
             android:layout_marginTop="16dp"
-            android:text="Submit" />
+            android:layout_marginBottom="16dp"
+            android:text="Submit"
+            android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
 
         <Button
             android:id="@+id/buttonCancel"
+            style="@style/buttonStyle"
             android:layout_width="match_parent"
             android:layout_height="50dp"
-            android:text="Cancel" />
+            android:text="Cancel"
+            android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
 
     </LinearLayout>
 

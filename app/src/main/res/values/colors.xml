@@ -10,4 +10,5 @@
     <color name= "map_yellow"> #F9F3E3 </color>
     <color name= "map_border"> #13363C </color>
     <color name= "map_road"> #09475C </color>
+    <color name= "button_purple">#6750A4</color>
 </resources>

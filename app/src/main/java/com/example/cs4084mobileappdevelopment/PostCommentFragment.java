@@ -63,6 +63,9 @@ public class PostCommentFragment extends Fragment {
 //                String postId = getArguments().getString("postId");
 
                 CommentHandler.postComment(commentText, postId);
+                if (getFragmentManager() != null) {
+                    getFragmentManager().beginTransaction().remove(PostCommentFragment.this).commit();
+                }
             }
         });
 

@@ -100,21 +100,25 @@
 
         <Button
             android:id="@+id/CloseBtn"
+            style="@style/buttonStyle"
             android:layout_width="100dp"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:gravity="center"
             android:padding="10dp"
-            android:text="Close"
+            android:layout_marginBottom="10dp"
 
-            />
+            android:text="Close"
+            android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
 
         <Button
             android:id="@+id/view_comment_button"
+            style="@style/buttonStyle"
             android:layout_width="150dp"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:text="View Comments" />
+            android:text="View Comments"
+            android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
 
     </LinearLayout>
 
