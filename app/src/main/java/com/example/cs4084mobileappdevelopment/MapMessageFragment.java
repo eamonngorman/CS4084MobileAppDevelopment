@@ -167,7 +167,6 @@ public class MapMessageFragment extends Fragment {
                 FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
                 fragmentTransaction.replace(R.id.fragment_container, commentFragment);
                 fragmentTransaction.commit();
-//                return true;
             }
         });
 

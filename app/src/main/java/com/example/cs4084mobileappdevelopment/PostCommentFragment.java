@@ -49,14 +49,10 @@ public class PostCommentFragment extends Fragment {
         auth = FirebaseAuth.getInstance();
         user = auth.getCurrentUser();
 
-        // Get the post ID from the arguments
-//        postId = getArguments().getString("postId");
 
-        // Initialize views
         commentEditText = view.findViewById(R.id.comment_edit_text);
         postCommentButton = view.findViewById(R.id.comment_button);
 
-        // Set up the post comment button
         postCommentButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
