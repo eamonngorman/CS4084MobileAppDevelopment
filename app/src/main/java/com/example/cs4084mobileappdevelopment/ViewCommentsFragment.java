@@ -17,10 +17,13 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 public class ViewCommentsFragment extends Fragment {
@@ -32,10 +35,15 @@ public class ViewCommentsFragment extends Fragment {
 
     private FusedLocationProviderClient fusedLocationClient;
     private FirebaseFirestore firestore;
-
+    DocumentReference messageRef;
 
     public ViewCommentsFragment(){
 
+    }
+
+    public ViewCommentsFragment(DocumentReference messageRef){
+
+        this.messageRef = messageRef;
     }
 
 
@@ -51,7 +59,7 @@ public class ViewCommentsFragment extends Fragment {
 
         commentsRef = db.collection("comments");
 
-        Query query = commentsRef.whereEqualTo("postId", "fe7YoAz5va9nwqiXGl4v");
+        Query query = commentsRef.whereEqualTo("postId", messageRef.getId());
 
         query.addSnapshotListener((querySnapshot, error) -> {
             if (error != null) {
@@ -62,6 +70,13 @@ public class ViewCommentsFragment extends Fragment {
             if (querySnapshot != null) {
 
                 List<Comment> commentsList = querySnapshot.toObjects(Comment.class);
+                commentsList.sort(new Comparator<Comment>() {
+                    @Override
+                    public int compare(Comment c1, Comment c2) {
+                        return Long.compare(c2.getTimestamp(), c1.getTimestamp());
+                    }
+                });
+
                 commentsAdapter.setComments(commentsList);
                 for (DocumentSnapshot document : querySnapshot.getDocuments()) {
                     Log.d("ViewCommentsFragment", "got one: " + document.getData());
@@ -72,16 +87,32 @@ public class ViewCommentsFragment extends Fragment {
         });
 
 
-        view.findViewById(R.id.post_comment_button).setOnClickListener(v -> {
-            // add button stuff
+        view.findViewById(R.id.post_comment_button).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                PostCommentFragment commentFragment = new PostCommentFragment(messageRef);
+                FragmentManager fragmentManager = getParentFragmentManager();
+                FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+                fragmentTransaction.add(R.id.message_container, commentFragment);
+                fragmentTransaction.commit();
+            }
         });
 
-        view.findViewById(R.id.close_comments).setOnClickListener(v -> {
-            // add button stuff
-        });
+        view.findViewById(R.id.close_comments).setOnClickListener(new View.OnClickListener() {
+
+                @Override
+                public void onClick(View v) {
+                    if (getFragmentManager() != null) {
+                        getFragmentManager().beginTransaction().remove(ViewCommentsFragment.this).commit();
+                    }
+                }
+            });
+
 
         return view;
     }
+
+
 }
 
 

@@ -31,8 +31,8 @@ public class CommentsAdapter extends RecyclerView.Adapter<CommentsAdapter.Commen
     public void onBindViewHolder(@NonNull CommentViewHolder holder, int position) {
         Comment comment = comments.get(position);
 //        holder.bind(comment);
-        holder.commentTextView.setText("TEXT" + comment.getComment());
-        holder.commentTimeView.setText("Time:" + comment.getTime());
+        holder.commentTextView.setText(comment.getComment());
+        holder.commentTimeView.setText("Posted:" + getTimeAgo(comment.getTimestamp()));
         holder.commentAuthorView.setText("By:" + comment.getAuthor());
 
     }
@@ -57,5 +57,17 @@ public class CommentsAdapter extends RecyclerView.Adapter<CommentsAdapter.Commen
         }
     }
 
+    private String getTimeAgo(long TimeOfComment) {
 
+        long timeDifference = System.currentTimeMillis() - TimeOfComment;
+        if (timeDifference < 60000) {
+            return "just now";
+        } else if (timeDifference < 3600000) {
+            return (timeDifference / 60000) + " minutes ago";
+        } else if (timeDifference < 86400000) {
+            return (timeDifference / 3600000) + " hours ago";
+        } else {
+            return (timeDifference / 86400000) + " days ago";
+        }
+    }
 }

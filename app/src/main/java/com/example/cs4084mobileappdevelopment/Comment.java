@@ -4,7 +4,7 @@ public class Comment {
 
     private String comment;
     private String author; //might add random username feature
-    private int timestamp;
+    private long timestamp;
 
     public Comment() {
 
@@ -34,7 +34,7 @@ public class Comment {
         this.author = author;
     }
 
-    public int getTime() {
+    public long getTimestamp() {
         return timestamp;
     }
 

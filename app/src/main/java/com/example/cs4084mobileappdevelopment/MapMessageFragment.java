@@ -145,7 +145,7 @@ public class MapMessageFragment extends Fragment {
         upvoteButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(getActivity(), "PostID", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getActivity(), "Voted on Post", Toast.LENGTH_SHORT).show();
                 voteHandler.upvote(postRef, userId);
             }
         });
@@ -153,7 +153,7 @@ public class MapMessageFragment extends Fragment {
         downvoteButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(getActivity(), "Clicked downvote" + postRef + " as user " + userId, Toast.LENGTH_SHORT).show();
+                Toast.makeText(getActivity(), "Voted on Post", Toast.LENGTH_SHORT).show();
                 voteHandler.downvote(postRef, userId);
             }
         });
@@ -162,26 +162,11 @@ public class MapMessageFragment extends Fragment {
             @Override
             public void onClick(View v) {
 
-                ViewCommentsFragment viewCommentFragment = new ViewCommentsFragment();
-//                ViewCommentsFragment commentFragment = new ViewCommentsFragment(postRef);
+                ViewCommentsFragment viewCommentFragment = new ViewCommentsFragment(postRef);
                 FragmentManager fragmentManager = getParentFragmentManager();
                 FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-                fragmentTransaction.add(R.id.fragment_container, viewCommentFragment);
+                fragmentTransaction.add(R.id.message_container, viewCommentFragment);
                 fragmentTransaction.commit();
-
-
-//                PostCommentFragment commentFragment = new PostCommentFragment(postRef);
-//        FragmentManager fragmentManager = getParentFragmentManager();
-//        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-//        fragmentTransaction.add(R.id.message_container, commentFragment);
-//        fragmentTransaction.commit();
-//
-////                PostCommentFragment commentFragment = new PostCommentFragment(postRef);
-////
-////                getSupportFragmentManager().beginTransaction()
-////                        .replace(R.id.message_container, commentFragment)
-////                        .commit();
-
 
 
             }
