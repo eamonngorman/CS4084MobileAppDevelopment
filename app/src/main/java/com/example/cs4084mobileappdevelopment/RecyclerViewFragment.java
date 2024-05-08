@@ -25,6 +25,7 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.GeoPoint;
@@ -38,12 +39,12 @@ import java.util.List;
 public class RecyclerViewFragment extends Fragment {
 
     private final int FINE_PERMISSION_CODE = 1;
-
     private RecyclerView recyclerView;
     private MessageAdapter adapter;
     private FusedLocationProviderClient fusedLocationClient;
     private Location currentLocation;
     private FirebaseFirestore firestore;
+    private FirebaseAuth auth;
 
     public RecyclerViewFragment() {
         // Required empty public constructor
@@ -63,7 +64,10 @@ public class RecyclerViewFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_recycler_view, container, false);
         recyclerView = view.findViewById(R.id.recycler_view);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        adapter = new MessageAdapter();
+        auth = FirebaseAuth.getInstance();
+        String userId = auth.getCurrentUser().getUid();
+
+        adapter = new MessageAdapter(requireContext(), userId);
         recyclerView.setAdapter(adapter);
 
         getLastLocation();
@@ -125,14 +129,14 @@ public class RecyclerViewFragment extends Fragment {
 
                                 if (distanceInM <= radiusInM) {
                                     // Convert document to Message object
-                                    Message message = doc.toObject(Message.class);
+                                    Message message = new Message(doc.getId(), doc.getString("message"), lat, lng, doc.getString("category"));
                                     matchingMessages.add(message);
                                 }
                             }
                         }
 
                         // Update RecyclerView with the retrieved messages
-                        adapter.setData(matchingMessages);
+                        adapter.setData(matchingMessages, adapter.userId);
                     }
                 });
     }
