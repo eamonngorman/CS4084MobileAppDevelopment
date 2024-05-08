@@ -12,6 +12,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 
 import com.example.cs4084mobileappdevelopment.Handlers.VoteHandler;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -20,6 +21,14 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
+import androidx.fragment.app.FragmentContainerView;
+
+import com.example.cs4084mobileappdevelopment.MapMessageFragment;
+import com.example.cs4084mobileappdevelopment.R;
+
 
 public class MapMessageFragment extends Fragment {
 
@@ -65,15 +74,20 @@ public class MapMessageFragment extends Fragment {
         ImageButton upvoteButton = view.findViewById(R.id.upvoteBtn);
         ImageButton downvoteButton = view.findViewById(R.id.downvoteBtn);
         Button closeButton = view.findViewById(R.id.CloseBtn);
+        Button commentButton = view.findViewById(R.id.comment_button);
 
         updateVotes(upvoteRef, UpvoteCount);
         updateVotes(downvoteRef, DownvoteCount);
 
         displayPostDetails(args, view);
 
-        setButtonClickListeners(closeButton, upvoteButton, downvoteButton, postRef, userId, voteHandler);
+        setButtonClickListeners(closeButton, upvoteButton, downvoteButton, postRef, userId, voteHandler, commentButton);
 
         return view;
+
+
+
+
     }
 
     private void updateVotes(DocumentReference voteRef, TextView voteCountView) {
@@ -118,7 +132,7 @@ public class MapMessageFragment extends Fragment {
         messageTextView.setText(markerMessage);
     }
 
-    private void setButtonClickListeners(Button closeButton, ImageButton upvoteButton, ImageButton downvoteButton, DocumentReference postRef, String userId, VoteHandler voteHandler) {
+    private void setButtonClickListeners(Button closeButton, ImageButton upvoteButton, ImageButton downvoteButton, DocumentReference postRef, String userId, VoteHandler voteHandler, Button commentButton) {
         closeButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -143,7 +157,23 @@ public class MapMessageFragment extends Fragment {
                 voteHandler.downvote(postRef, userId);
             }
         });
+
+        commentButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                PostCommentFragment commentFragment = new PostCommentFragment(postRef);
+                FragmentManager fragmentManager = getParentFragmentManager();
+                FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+                fragmentTransaction.replace(R.id.fragment_container, commentFragment);
+                fragmentTransaction.commit();
+//                return true;
+            }
+        });
+
     }
+
+
 
     private String getTimeAgo(long timeDifference) {
         if (timeDifference < 60000) {
