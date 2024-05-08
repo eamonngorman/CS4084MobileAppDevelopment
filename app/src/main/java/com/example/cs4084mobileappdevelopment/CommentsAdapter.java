@@ -30,7 +30,8 @@ public class CommentsAdapter extends RecyclerView.Adapter<CommentsAdapter.Commen
     @Override
     public void onBindViewHolder(@NonNull CommentViewHolder holder, int position) {
         Comment comment = comments.get(position);
-        holder.commentTextView.setText("TEXT" + comment.getText());
+        holder.bind(comment);
+//        holder.commentTextView.setText("TEXT" + comment.getText());
         holder.commentTimeView.setText("Time:" + comment.getTime());
         holder.commentAuthorView.setText("By:" + comment.getAuthor());
 
@@ -53,6 +54,13 @@ public class CommentsAdapter extends RecyclerView.Adapter<CommentsAdapter.Commen
             commentTextView = itemView.findViewById(R.id.comment_text);
             commentTimeView = itemView.findViewById(R.id.comment_timestamp);
             commentAuthorView = itemView.findViewById(R.id.comment_author);
+        }
+
+        public void bind(Comment comment) {
+            commentTextView.setText("HERE " + comment.getComment());
+//            String location = String.format("Location: %s, %s", message.getLatitude(), message.getLongitude());
+//            locationTextView.setText(location);
+//            eventTypeTextView.setText("Event Type: " + message.getCategory());
         }
     }
 

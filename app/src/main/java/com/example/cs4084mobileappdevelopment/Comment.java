@@ -16,11 +16,13 @@ public class Comment {
         this.timestamp = timestamp;
     }
 
-    public String getText() {
+    public String getComment() {
+
         return comment;
     }
 
     public void setText(String text) {
+
         this.comment = text;
     }
 
