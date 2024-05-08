@@ -11,6 +11,7 @@ import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
@@ -21,6 +22,8 @@ import android.view.View;
 import android.view.WindowInsets;
 import android.view.WindowInsetsController;
 import android.widget.FrameLayout;
+import android.widget.SeekBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.firebase.geofire.GeoFireUtils;
@@ -34,6 +37,8 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.Circle;
+import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.Marker;
@@ -55,6 +60,9 @@ import java.util.Locale;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
+    // Storing markers on the map for range queries
+    private List<Marker> markers = new ArrayList<>();
+
     @RequiresApi(api = Build.VERSION_CODES.R)
     private void handleWindowInsetsForAndroidRAndAbove() {
         final WindowInsetsController insetsController = getWindow().getInsetsController();
@@ -70,12 +78,52 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     Location currentLocation;
     FusedLocationProviderClient fusedLocationProviderClient;
 
+    private Circle circle;
+
+
+
+
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
 
         map = findViewById(R.id.map);
+        SeekBar seekBar = findViewById(R.id.slider);
+        TextView sliderValue = findViewById(R.id.slider_value);
+
+        // The slider for range
+        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+            }
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+            }
+
+            // Returning the radius based on progress, defaults to 5000M
+            // Clears the map of markers and queries for new ones
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                int progress = seekBar.getProgress();
+                int meters = (progress + 1) * 1000;
+                sliderValue.setText(String.format("%d meters", meters));
+
+                if (currentLocation != null) {
+                    LatLng userLocation = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
+                    drawCircle(userLocation, meters);
+
+                    for (Marker marker : markers) {
+                        marker.remove();
+                    }
+                    markers.clear();
+
+                    queryMessagesNearby(currentLocation.getLatitude(), currentLocation.getLongitude(), meters);
+                }
+            }
+        });
 
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
         getLastLocation();
@@ -111,6 +159,22 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 }
             }
         });
+    }
+
+    private void drawCircle(LatLng center, double radius) {
+        CircleOptions circleOptions = new CircleOptions()
+                .center(center)
+                .radius(radius)
+                .fillColor(0x220000FF)
+                .strokeWidth(3);
+
+        // if the circle already exists we update the radius
+        if (circle != null) {
+            circle.setCenter(center);
+            circle.setRadius(radius);
+        } else {
+            circle = gMap.addCircle(circleOptions);
+        }
     }
 
     @Override
@@ -176,7 +240,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         LatLng myLocation = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
         //this.gMap.addMarker(new MarkerOptions().position(myLocation).title("My Location"));
         this.gMap.moveCamera(CameraUpdateFactory.newLatLngZoom(myLocation, 15));
-        queryMessagesNearby(currentLocation.getLatitude(), currentLocation.getLongitude());
+        queryMessagesNearby(currentLocation.getLatitude(), currentLocation.getLongitude(), 5000);
+        // Initial 5km radius
+        drawCircle(myLocation, 5000);
 
 
         TaskbarFragment taskbarFragment = new TaskbarFragment();
@@ -203,11 +269,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         return BitmapDescriptorFactory.fromBitmap(bitmap);
     }
 
-    private void queryMessagesNearby(double currentLatitude, double currentLongitude) {
+    private void queryMessagesNearby(double currentLatitude, double currentLongitude, double radiusInM) {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
 
         GeoLocation center = new GeoLocation(currentLatitude, currentLongitude);
-        final double radiusInM = 10 * 1000;
         List<GeoQueryBounds> bounds = GeoFireUtils.getGeoHashQueryBounds(center, radiusInM);
 
         final List<Task<QuerySnapshot>> tasks = new ArrayList<>();
@@ -283,9 +348,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                     }
                                 }
 
-                                // Create the marker and attach the DocumentSnapshot object to it
                                 Marker marker = gMap.addMarker(markerOptions);
                                 marker.setTag(documentSnapshot);
+                                markers.add(marker);
                             }
                         }
                     }
