@@ -56,6 +56,7 @@ dependencies {
     implementation("com.google.android.gms:play-services-location:21.2.0")
     implementation ("ch.hsr:geohash:1.4.0")
     implementation ("com.firebase:geofire-android-common:3.1.0")
-
+    implementation ("com.google.code.gson:gson:2.9.0")
+    implementation ("com.squareup.okhttp3:okhttp:4.9.3")
 
 }
