@@ -109,6 +109,13 @@
 
             />
 
+        <Button
+            android:id="@+id/view_comment_button"
+            android:layout_width="150dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:text="View Comments" />
+
     </LinearLayout>
 
 
