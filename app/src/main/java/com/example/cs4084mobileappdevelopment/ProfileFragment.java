@@ -13,10 +13,13 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.OnFailureListener;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,7 +39,8 @@ public class ProfileFragment extends Fragment {
     long upvotes = 0;
     long downvotes = 0;
     long totalVotes = 0;
-    private String getTimeAgo(long timeDifference){
+
+    private String getTimeAgo(long timeDifference) {
         if (timeDifference < 60000) {
             return "just now";
         } else if (timeDifference < 3600000) {
@@ -101,6 +105,26 @@ public class ProfileFragment extends Fragment {
                 holder.messageTextView.setText(message);
                 holder.categoryTextView.setText(category);
                 holder.timeTextView.setText(time);
+                holder.deleteButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        int adapterPosition = holder.getAdapterPosition();
+                        String messageId = messageIds.get(adapterPosition);
+                        db.collection("messages").document(messageId).delete()
+                                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                    @Override
+                                    public void onSuccess(Void aVoid) {
+                                        Log.d("ProfileFragment", "deleted");
+                                    }
+                                })
+                                .addOnFailureListener(new OnFailureListener() {
+                                    @Override
+                                    public void onFailure(@NonNull Exception e) {
+                                        Log.w("ProfileFragment", "Error deleting document", e);
+                                    }
+                                });
+                    }
+                });
             }
 
             @Override
@@ -112,12 +136,14 @@ public class ProfileFragment extends Fragment {
                 TextView messageTextView;
                 TextView categoryTextView;
                 TextView timeTextView;
+                Button deleteButton;
 
                 MessageViewHolder(View view) {
                     super(view);
                     messageTextView = view.findViewById(R.id.messageText);
                     categoryTextView = view.findViewById(R.id.categoryText);
                     timeTextView = view.findViewById(R.id.timeText);
+                    deleteButton = view.findViewById(R.id.deleteButton);
                 }
             }
         }
@@ -186,7 +212,6 @@ public class ProfileFragment extends Fragment {
                     }
 
                 });
-
 
 
         return view;
