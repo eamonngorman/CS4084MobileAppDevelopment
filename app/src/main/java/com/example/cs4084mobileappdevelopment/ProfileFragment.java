@@ -10,13 +10,18 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.OnFailureListener;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,7 +41,8 @@ public class ProfileFragment extends Fragment {
     long upvotes = 0;
     long downvotes = 0;
     long totalVotes = 0;
-    private String getTimeAgo(long timeDifference){
+
+    private String getTimeAgo(long timeDifference) {
         if (timeDifference < 60000) {
             return "just now";
         } else if (timeDifference < 3600000) {
@@ -78,11 +84,15 @@ public class ProfileFragment extends Fragment {
             private List<String> messagesList;
             private List<String> categoriesList;
             private List<String> timeList;
+            private FragmentManager fragmentManager;
+            private Fragment fragment;
 
-            MessageAdapter(List<String> messagesList, List<String> categoriesList, List<String> timeList) {
+            MessageAdapter(List<String> messagesList, List<String> categoriesList, List<String> timeList, FragmentManager fragmentManager, Fragment fragment) {
                 this.messagesList = messagesList;
                 this.categoriesList = categoriesList;
                 this.timeList = timeList;
+                this.fragmentManager = fragmentManager;
+                this.fragment = fragment;
             }
 
             @NonNull
@@ -101,6 +111,30 @@ public class ProfileFragment extends Fragment {
                 holder.messageTextView.setText(message);
                 holder.categoryTextView.setText(category);
                 holder.timeTextView.setText(time);
+                holder.deleteButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        int adapterPosition = holder.getAdapterPosition();
+                        String messageId = messageIds.get(adapterPosition);
+                        db.collection("messages").document(messageId)
+                                .update("deleted", true)
+                                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                    @Override
+                                    public void onSuccess(Void aVoid) {
+                                        Log.d("ProfileFragment", "deleted");
+                                        FragmentTransaction ft = fragmentManager.beginTransaction();
+                                        ft.replace(R.id.fragment_container, new ProfileFragment());
+                                        ft.commit();
+                                    }
+                                })
+                                .addOnFailureListener(new OnFailureListener() {
+                                    @Override
+                                    public void onFailure(@NonNull Exception e) {
+                                        Log.w("ProfileFragment", "Error deleting document", e);
+                                    }
+                                });
+                    }
+                });
             }
 
             @Override
@@ -112,17 +146,19 @@ public class ProfileFragment extends Fragment {
                 TextView messageTextView;
                 TextView categoryTextView;
                 TextView timeTextView;
+                Button deleteButton;
 
                 MessageViewHolder(View view) {
                     super(view);
                     messageTextView = view.findViewById(R.id.messageText);
                     categoryTextView = view.findViewById(R.id.categoryText);
                     timeTextView = view.findViewById(R.id.timeText);
+                    deleteButton = view.findViewById(R.id.deleteButton);
                 }
             }
         }
 
-        adapter = new MessageAdapter(messagesList, categoriesList, timeList);
+        adapter = new MessageAdapter(messagesList, categoriesList, timeList, getParentFragmentManager(), this);
         postsRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         postsRecyclerView.setAdapter(adapter);
 
@@ -137,11 +173,16 @@ public class ProfileFragment extends Fragment {
                             String category = document.getString("category");
                             long timestamp = document.getLong("timestamp");
                             String time = getTimeAgo(currentTime - timestamp);
+                            Boolean deleted = document.getBoolean("deleted");
 
                             messagesList.add(message);
                             messageIds.add(document.getId());
-                            categoriesList.add(category);
                             timeList.add(time);
+                            if (deleted) {
+                                categoriesList.add("DELETED");
+                            } else {
+                                categoriesList.add(category);
+                            }
                         }
                         adapter.notifyDataSetChanged();
                         Log.d("ProfileFragment", "userID: " + user.getUid());
@@ -186,7 +227,6 @@ public class ProfileFragment extends Fragment {
                     }
 
                 });
-
 
 
         return view;

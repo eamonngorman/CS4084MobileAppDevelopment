@@ -127,7 +127,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
                 if (documentSnapshot != null) {
                     String markerTitle = "Post";
-                    String markerMessage= documentSnapshot.getString("message");
+                    String markerMessage = documentSnapshot.getString("message");
                     long timestamp = documentSnapshot.getLong("timestamp");
                     double lat = documentSnapshot.getDouble("latitude");
                     double lng = documentSnapshot.getDouble("longitude");
@@ -243,51 +243,54 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         }
 
                         for (DocumentSnapshot documentSnapshot : matchingDocs) {
-                            String message = documentSnapshot.getString("message");
-                            String category = documentSnapshot.getString("category");
-                            double messageLat = documentSnapshot.getDouble("latitude");
-                            double messageLng = documentSnapshot.getDouble("longitude");
+                            Boolean deleted = documentSnapshot.getBoolean("deleted");
+                            if (deleted == null || deleted == false) {
 
-                            LatLng messageLocation = new LatLng(messageLat, messageLng);
+                                String message = documentSnapshot.getString("message");
+                                String category = documentSnapshot.getString("category");
+                                double messageLat = documentSnapshot.getDouble("latitude");
+                                double messageLng = documentSnapshot.getDouble("longitude");
 
-                            MarkerOptions markerOptions = new MarkerOptions().position(messageLocation).title(message);
+                                LatLng messageLocation = new LatLng(messageLat, messageLng);
 
-                            if (category != null) {
-                                int iconResId = 0;
-                                switch (category) {
-                                    case "General":
-                                        iconResId = R.drawable.small_info;
-                                        break;
-                                    case "Traffic alert":
-                                        iconResId = R.drawable.small_traffic;
-                                        break;
-                                    case "Event":
-                                        iconResId = R.drawable.small_meetup;
-                                        break;
-                                    case "Question":
-                                        iconResId = R.drawable.small_question;
-                                        break;
-                                    case "Safety notice":
-                                        iconResId = R.drawable.small_danger;
-                                        break;
-                                    case "null":
-                                        iconResId = R.drawable.small_info;
-                                        break;
+                                MarkerOptions markerOptions = new MarkerOptions().position(messageLocation).title(message);
+
+                                if (category != null) {
+                                    int iconResId = 0;
+                                    switch (category) {
+                                        case "General":
+                                            iconResId = R.drawable.small_info;
+                                            break;
+                                        case "Traffic alert":
+                                            iconResId = R.drawable.small_traffic;
+                                            break;
+                                        case "Event":
+                                            iconResId = R.drawable.small_meetup;
+                                            break;
+                                        case "Question":
+                                            iconResId = R.drawable.small_question;
+                                            break;
+                                        case "Safety notice":
+                                            iconResId = R.drawable.small_danger;
+                                            break;
+                                        case "null":
+                                            iconResId = R.drawable.small_info;
+                                            break;
+                                    }
+
+                                    if (iconResId != 0) {
+                                        markerOptions.icon(getMarkerIcon(iconResId));
+                                    }
                                 }
 
-                                if (iconResId != 0) {
-                                    markerOptions.icon(getMarkerIcon(iconResId));
-                                }
+                                // Create the marker and attach the DocumentSnapshot object to it
+                                Marker marker = gMap.addMarker(markerOptions);
+                                marker.setTag(documentSnapshot);
                             }
-
-                            // Create the marker and attach the DocumentSnapshot object to it
-                            Marker marker = gMap.addMarker(markerOptions);
-                            marker.setTag(documentSnapshot);
                         }
                     }
                 });
     }
-
 
 
 }
