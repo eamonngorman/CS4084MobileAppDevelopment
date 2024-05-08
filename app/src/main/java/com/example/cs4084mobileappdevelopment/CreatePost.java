@@ -162,6 +162,7 @@ public class CreatePost extends Fragment {
                                 .addOnFailureListener(e -> {
                                     Log.e("Firestore", "Error creating document in downvotes collection", e);
                                 });
+                        getActivity().getSupportFragmentManager().beginTransaction().remove(CreatePost.this).commit();
                     }
 
     })

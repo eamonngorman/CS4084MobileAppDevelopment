@@ -11,18 +11,18 @@
         android:id="@+id/messageText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textSize="16sp"
+        android:padding="4dp"
         android:textColor="#000"
-        android:textStyle="bold"
-        android:padding="4dp"/>
+        android:textSize="16sp"
+        android:textStyle="bold" />
 
     <TextView
         android:id="@+id/timeText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textSize="14sp"
+        android:padding="4dp"
         android:textColor="#666"
-        android:padding="4dp"/>
+        android:textSize="14sp" />
 
     <TextView
         android:id="@+id/categoryText"
@@ -31,4 +31,10 @@
         android:textSize="14sp"
         android:textColor="#666"
         android:padding="4dp"/>
+
+    <Button
+        android:id="@+id/deleteButton"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:text="Delete Post" />
 </LinearLayout>
