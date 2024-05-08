@@ -92,8 +92,6 @@ public class RecyclerViewFragment extends Fragment {
     }
 
 
-
-
     private void queryMessagesNearby(double currentLatitude, double currentLongitude) {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
 
@@ -121,16 +119,20 @@ public class RecyclerViewFragment extends Fragment {
                             QuerySnapshot snap = task.getResult();
 
                             for (DocumentSnapshot doc : snap.getDocuments()) {
-                                double lat = doc.getDouble("latitude");
-                                double lng = doc.getDouble("longitude");
+                                Boolean deleted = doc.getBoolean("deleted");
+                                if (deleted == null || deleted == false) {
 
-                                GeoLocation docLocation = new GeoLocation(lat, lng);
-                                double distanceInM = GeoFireUtils.getDistanceBetween(docLocation, center);
+                                    double lat = doc.getDouble("latitude");
+                                    double lng = doc.getDouble("longitude");
 
-                                if (distanceInM <= radiusInM) {
-                                    // Convert document to Message object
-                                    Message message = new Message(doc.getId(), doc.getString("message"), lat, lng, doc.getString("category"));
-                                    matchingMessages.add(message);
+                                    GeoLocation docLocation = new GeoLocation(lat, lng);
+                                    double distanceInM = GeoFireUtils.getDistanceBetween(docLocation, center);
+
+                                    if (distanceInM <= radiusInM) {
+                                        // Convert document to Message object
+                                        Message message = new Message(doc.getId(), doc.getString("message"), lat, lng, doc.getString("category"));
+                                        matchingMessages.add(message);
+                                    }
                                 }
                             }
                         }
