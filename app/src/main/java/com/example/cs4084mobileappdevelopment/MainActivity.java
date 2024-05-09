@@ -11,28 +11,26 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowInsets;
 import android.view.WindowInsetsController;
-import android.widget.Button;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.TextView;
 
-import com.google.android.gms.location.LocationRequest;
-import com.google.firebase.Firebase;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
-import androidx.fragment.app.FragmentContainerView;
 
-import com.example.cs4084mobileappdevelopment.TaskbarFragment;
 import com.google.firebase.firestore.FirebaseFirestore;
 
-import android.view.Menu;
-import android.view.MenuItem;
 import android.widget.Toast;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -102,13 +100,43 @@ public class MainActivity extends AppCompatActivity {
         textView = findViewById(R.id.user_details);
         user = auth.getCurrentUser();
 
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        UserNameHandler un = new UserNameHandler();
+        boolean hasUserName;
+
+
+
         if (user == null) {
             Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
             startActivity(intent);
             finish();
         } else {
-            textView.setText(user.getEmail());
+
+
+            un.queryCheckUserName(user.getUid(), new UserNameHandler.QueryCallback() { //need to so it times right
+                @Override
+                public void onQueryCompleted(boolean result) {
+//                    System.out.println("Here 3: " + result); // testing
+
+                    if(!result) { //if user has no name ....
+                        un.queryAddUsername(user.getUid());
+                    }
+                }
+            });
+
+            un.getUserName(user.getUid(), new UserNameHandler.QueryCallbackString() {
+                @Override
+                public void onQueryCompletedString(String username) {
+                    System.out.println("USERNAME: " +  username);
+                    textView.setText("Hello " + username);
+                }
+            });
+
+
+
         }
+
+
 
         // Load Taskbar Fragment
         FragmentManager fragmentManager = getSupportFragmentManager();
@@ -123,7 +151,7 @@ public class MainActivity extends AppCompatActivity {
         recyclerViewTransaction.replace(R.id.recycler_view_container, recyclerViewFragment);
         recyclerViewTransaction.commit();
 
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        db = FirebaseFirestore.getInstance();
         db.collection("messages")
                 .get()
                 .addOnCompleteListener(task -> {
@@ -139,5 +167,10 @@ public class MainActivity extends AppCompatActivity {
                         }
                     }
                 });
+
+
     }
+
+
+
 }

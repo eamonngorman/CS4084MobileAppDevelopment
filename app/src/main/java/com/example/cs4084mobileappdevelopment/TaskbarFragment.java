@@ -76,8 +76,6 @@ public class TaskbarFragment extends Fragment {
             public void onClick(View view) {
                 Intent intent = new Intent(getActivity(), MainActivity.class);
                 startActivity(intent);
-                UserNameHandler n = new UserNameHandler();
-                n.getRandomWord();
 
             }
         });

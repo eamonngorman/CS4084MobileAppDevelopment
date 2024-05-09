@@ -15,7 +15,7 @@ import java.util.Map;
 public class CommentHandler {
 
     public static void postComment(String commentText, String postId){
-        // Get the post ID
+
 
         Map<String, Object> comment = new HashMap<>();
         comment.put("postId", postId);
