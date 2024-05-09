@@ -124,6 +124,16 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
 
+            un.getUserName(user.getUid(), new UserNameHandler.QueryCallbackString() {
+                @Override
+                public void onQueryCompletedString(String username) {
+                    System.out.println("USERNAME: " +  username);
+                    textView.setText("Hello " + username);
+                }
+            });
+
+
+
         }
 
 
