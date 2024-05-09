@@ -2,14 +2,23 @@ package com.example.cs4084mobileappdevelopment;
 
 import static com.google.gson.JsonParser.parseReader;
 
-import com.google.gson.Gson;
+import androidx.annotation.NonNull;
+
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 
 
@@ -58,21 +67,21 @@ public class UserNameHandler {
                 .scheme("https")
                 .host("api.datamuse.com")
                 .addPathSegment("words")
-                .addQueryParameter("rel_jja", word1)
+                .addQueryParameter("rel_jjb", word1)
                 .build();
 
         HttpUrl requestUrlVerb = new HttpUrl.Builder()
                 .scheme("https")
                 .host("api.datamuse.com")
                 .addPathSegment("words")
-                .addQueryParameter("rel_jja", word2)
+                .addQueryParameter("rel_trg", word3)
                 .build();
 
         HttpUrl requestUrlNoun = new HttpUrl.Builder()
                 .scheme("https")
                 .host("api.datamuse.com")
                 .addPathSegment("words")
-                .addQueryParameter("rel_jja", word3)
+                .addQueryParameter("rel_jja", word2)
                 .build();
 
         urls.add(requestUrlAdjetive);
@@ -107,8 +116,9 @@ public class UserNameHandler {
                     for (int j = 0; j < jsonArray.size(); j++) {
                         JsonObject jsonObject = jsonArray.get(j).getAsJsonObject();
                         String word = jsonObject.get("word").getAsString();
+                        word = word.substring(0, 1).toUpperCase() + word.substring(1);;
 //                        System.out.println("Related word: " + word);
-                        userWords.add(word);
+                        userWords.add(word) ;
 //                        System.out.println("SIZE +++++++++++" + userWords.size());
                     }
 
@@ -138,5 +148,75 @@ public class UserNameHandler {
         return userName;
     }
 
+
+    public interface QueryCallback {
+        void onQueryCompleted(boolean result);
+    }
+
+    public void queryCheckUserName(String id, QueryCallback callback) {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        CollectionReference usernamesRef = db.collection("usernames");
+
+        Query query = usernamesRef.whereEqualTo("userId", id);
+        query.get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+            @Override
+            public void onSuccess(QuerySnapshot querySnapshot) {
+//                System.out.println("TESTING     : " + querySnapshot.isEmpty());
+                if (querySnapshot.isEmpty()) {
+//                    System.out.println("Here 2: false");
+                    callback.onQueryCompleted(false);
+                } else {
+//                    System.out.println("Here 1: true");
+                    callback.onQueryCompleted(true);
+                }
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+//                System.out.println("TESTING     : ");
+                e.printStackTrace();
+                callback.onQueryCompleted(false);
+            }
+        });
+    }
+
+
+    public void queryAddUsername(String id) {
+
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        CollectionReference usernamesRef = db.collection("usernames");
+
+        String username = this.getRandomWord();
+
+        Map<String, Object> postData = new HashMap<>();
+        postData.put("username", username);
+        postData.put("userId", id);
+
+        usernamesRef.add(postData);
+    }
+
+    public String getUserName(String id) {
+
+        String username = "";
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        CollectionReference usernamesRef = db.collection("usernames");
+
+        Query query = usernamesRef.whereEqualTo("userId", id);
+
+        try {
+            for (DocumentSnapshot document : query.get().getResult()) {
+                // Extract username
+
+                 username = document.getString("username");
+//                System.out.println("1231231231231231" + username);
+
+            }
+        } catch (Exception e) {
+            System.err.println("Error getting documents: " + e.getMessage());
+        }
+
+//        System.out.println("1231231231231231" + username);
+        return username;
+    }
 
 }
