@@ -4,6 +4,8 @@ import androidx.annotation.NonNull;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -14,13 +16,14 @@ import java.util.Map;
 
 public class CommentHandler {
 
-    public static void postComment(String commentText, String postId){
+    public static void postComment(String commentText, String postId, String author){
 
 
         Map<String, Object> comment = new HashMap<>();
         comment.put("postId", postId);
         comment.put("comment", commentText);
         comment.put("timestamp", System.currentTimeMillis());
+        comment.put("author", author);
 
         CollectionReference commentsRef = FirebaseFirestore.getInstance().collection("comments");
 
@@ -38,4 +41,9 @@ public class CommentHandler {
                     }
                 });
     }
+
+
+
 }
+
+

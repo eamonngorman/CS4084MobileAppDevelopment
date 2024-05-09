@@ -33,11 +33,11 @@ public class CommentsAdapter extends RecyclerView.Adapter<CommentsAdapter.Commen
     @Override
     public void onBindViewHolder(@NonNull CommentViewHolder holder, int position) {
         Comment comment = comments.get(position);
-        setAuthToUsername(comment);
+//        setAuthToUsername(comment);
 //        holder.bind(comment);
         holder.commentTextView.setText(comment.getComment());
         holder.commentTimeView.setText("Posted:" + getTimeAgo(comment.getTimestamp()));
-        holder.commentAuthorView.setText("By:" + comment.getAuthor());
+        holder.commentAuthorView.setText("By: " + comment.getAuthor());
 
     }
 
@@ -73,24 +73,6 @@ public class CommentsAdapter extends RecyclerView.Adapter<CommentsAdapter.Commen
         } else {
             return (timeDifference / 86400000) + " days ago";
         }
-    }
-
-    private void setAuthToUsername(Comment c) {
-
-        UserNameHandler un = new UserNameHandler();
-        FirebaseAuth auth = FirebaseAuth.getInstance();
-        ;
-        FirebaseUser user = auth.getCurrentUser();
-        ;
-
-        assert user != null;
-        un.getUserName(user.getUid(), new UserNameHandler.QueryCallbackString() {
-            @Override
-            public void onQueryCompletedString(String username) {
-                c.setAuthor(username);
-            }
-        });
-
     }
 
 

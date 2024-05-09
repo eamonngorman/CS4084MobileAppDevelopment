@@ -59,10 +59,15 @@ public class PostCommentFragment extends Fragment {
             @Override
             public void onClick(View v) {
 
-                String commentText = commentEditText.getText().toString();
-//                String postId = getArguments().getString("postId");
+                UserNameHandler un = new UserNameHandler();
+                un.getUserName(user.getUid(), new UserNameHandler.QueryCallbackString() {
+                    @Override
+                    public void onQueryCompletedString(String username) {
+                        String commentText = commentEditText.getText().toString();
+                        CommentHandler.postComment(commentText, postId, username);
+                    }
+                });
 
-                CommentHandler.postComment(commentText, postId);
             }
         });
 
@@ -77,4 +82,6 @@ public class PostCommentFragment extends Fragment {
 
         return view;
     }
+
+
 }
