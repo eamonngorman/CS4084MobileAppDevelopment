@@ -34,6 +34,7 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class RecyclerViewFragment extends Fragment {
@@ -138,6 +139,8 @@ public class RecyclerViewFragment extends Fragment {
                         }
 
                         // Update RecyclerView with the retrieved messages
+                        Collections.reverse(matchingMessages);
+
                         adapter.setData(matchingMessages, adapter.userId);
                     }
                 });

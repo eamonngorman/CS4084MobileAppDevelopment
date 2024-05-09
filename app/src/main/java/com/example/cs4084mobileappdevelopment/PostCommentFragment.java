@@ -26,7 +26,6 @@ public class PostCommentFragment extends Fragment {
     FirebaseAuth auth;
     FirebaseUser user;
 
-
     private EditText commentEditText;
 
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
@@ -42,18 +41,16 @@ public class PostCommentFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+            Bundle savedInstanceState) {
 
         View view = inflater.inflate(R.layout.fragment_comment, container, false);
 
         auth = FirebaseAuth.getInstance();
         user = auth.getCurrentUser();
 
-
         commentEditText = view.findViewById(R.id.comment_edit_text);
         Button postCommentButton = view.findViewById(R.id.comment_button);
         Button closeButton = view.findViewById(R.id.close_comment_post);
-
 
         postCommentButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -68,6 +65,9 @@ public class PostCommentFragment extends Fragment {
                     }
                 });
 
+                if (getFragmentManager() != null) {
+                    getFragmentManager().beginTransaction().remove(PostCommentFragment.this).commit();
+                }
             }
         });
 
@@ -82,6 +82,4 @@ public class PostCommentFragment extends Fragment {
 
         return view;
     }
-
-
 }

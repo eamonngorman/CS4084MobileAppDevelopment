@@ -34,7 +34,9 @@
 
     <Button
         android:id="@+id/deleteButton"
+        style="@style/buttonStyle"
         android:layout_width="match_parent"
         android:layout_height="48dp"
-        android:text="Delete Post" />
+        android:text="Delete Post"
+        android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
 </LinearLayout>

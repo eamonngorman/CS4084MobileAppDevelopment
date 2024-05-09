@@ -25,6 +25,7 @@
 
         <Button
             android:id="@+id/buttonClose"
+            style="@style/buttonStyle"
             android:layout_width="55dp"
             android:layout_height="60dp"
             android:layout_marginStart="248dp"
