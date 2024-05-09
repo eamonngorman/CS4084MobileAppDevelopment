@@ -67,14 +67,23 @@ public class ProfileFragment extends Fragment {
                 }
             }
         });
-        TextView emailTextView = view.findViewById(R.id.user_details);
+        TextView userTextView = view.findViewById(R.id.user_details);
         TextView votesTextView = view.findViewById(R.id.upvotes);
         postsRecyclerView = view.findViewById(R.id.messageRecycler);
 
         auth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
         user = auth.getCurrentUser();
-        emailTextView.setText(user.getEmail());
+
+        UserNameHandler un = new UserNameHandler();
+        un.getUserName(user.getUid(), new UserNameHandler.QueryCallbackString() {
+
+            @Override
+            public void onQueryCompletedString(String username) {
+                userTextView.setText(username);
+
+            }
+        });
 
         messagesList = new ArrayList<>();
         messageIds = new ArrayList<>();

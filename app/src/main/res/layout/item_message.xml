@@ -60,6 +60,17 @@
         android:textColor="#666"
         android:layout_below="@id/location_text_view"
         android:layout_toStartOf="@id/upvote_button"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="8dp"/>
+
+    <TextView
+        android:id="@+id/author_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="16sp"
+        android:textColor="#666"
+        android:layout_below="@id/event_type_text_view"
+        android:layout_toStartOf="@id/upvote_button"
         android:layout_marginEnd="8dp"/>
 
 </RelativeLayout>

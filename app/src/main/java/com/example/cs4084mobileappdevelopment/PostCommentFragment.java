@@ -1,11 +1,13 @@
 package com.example.cs4084mobileappdevelopment;
 
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
@@ -53,14 +55,23 @@ public class PostCommentFragment extends Fragment {
         Button closeButton = view.findViewById(R.id.close_comment_post);
 
         postCommentButton.setOnClickListener(new View.OnClickListener() {
+
+
+
             @Override
             public void onClick(View v) {
+
+                String commentText = commentEditText.getText().toString();
+
+                if (TextUtils.isEmpty(commentText)) {
+                    Toast.makeText(getActivity(), "Enter Message", Toast.LENGTH_SHORT).show();
+                    return;
+                }
 
                 UserNameHandler un = new UserNameHandler();
                 un.getUserName(user.getUid(), new UserNameHandler.QueryCallbackString() {
                     @Override
                     public void onQueryCompletedString(String username) {
-                        String commentText = commentEditText.getText().toString();
                         CommentHandler.postComment(commentText, postId, username);
                     }
                 });

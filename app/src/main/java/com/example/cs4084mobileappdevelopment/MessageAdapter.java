@@ -63,6 +63,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         private TextView messageTextView;
         private TextView locationTextView;
         private TextView eventTypeTextView;
+        private TextView authorTextView;
         private ImageButton upvoteButton;
         private ImageButton downvoteButton;
 
@@ -73,6 +74,8 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
             eventTypeTextView = itemView.findViewById(R.id.event_type_text_view);
             upvoteButton = itemView.findViewById(R.id.upvote_button);
             downvoteButton = itemView.findViewById(R.id.downvote_button);
+            authorTextView = itemView.findViewById(R.id.author_text);
+
         }
 
         void bind(Message message) {
@@ -83,6 +86,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
             locationTextView.setText(location);
 
             eventTypeTextView.setText("Event Type: " + message.getCategory());
+            authorTextView.setText("Post By: " + message.getAuthor());
         }
 
         private String getGeocodedLocation(double latitude, double longitude) {

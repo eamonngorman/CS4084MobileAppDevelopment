@@ -69,6 +69,10 @@ public class CreatePost extends Fragment {
         buttonLogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                FirebaseAuth auth;
+                FirebaseUser user;
+                auth = FirebaseAuth.getInstance();
+                user = auth.getCurrentUser();
                 String message = String.valueOf(editTextMessage.getText());
                 String category = spinnerCategory.getSelectedItem().toString();
 
@@ -77,7 +81,16 @@ public class CreatePost extends Fragment {
                     return;
                 }
 
-                postMessageToFirestore(message, category);
+                UserNameHandler un = new UserNameHandler();
+                un.getUserName(user.getUid(), new UserNameHandler.QueryCallbackString() {
+
+                    @Override
+                    public void onQueryCompletedString(String username) {
+                        postMessageToFirestore(message, category, username);
+
+                    }
+                });
+
             }
         });
 
@@ -107,12 +120,13 @@ public class CreatePost extends Fragment {
         return null;
     }
 
-    private void postMessageToFirestore(String message, String category) {
+    private void postMessageToFirestore(String message, String category, String author) {
         Map<String, Object> postData = new HashMap<>();
         postData.put("message", message);
         postData.put("category", category);
         postData.put("timestamp", System.currentTimeMillis());
         postData.put("deleted", false);
+        postData.put("author", author);
 
         FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
         if (currentUser != null) {

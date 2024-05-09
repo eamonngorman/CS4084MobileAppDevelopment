@@ -12,18 +12,21 @@ public class Message {
     private double longitude;
     private String category;
     private String postId;
+    private String author;
 
     public Message() {
         // Default constructor required for Firestore
     }
 
-    public Message(String postId, String message, double latitude, double longitude, String category) {
+    public Message(String postId, String message, double latitude, double longitude, String category, String author) {
         this.postId = postId;
         this.message = message;
         this.latitude = latitude;
         this.longitude = longitude;
         this.category = category;
+        this.author = author;
     }
+
 
     // Getters and setters
     public String getMessage() {
@@ -64,6 +67,14 @@ public class Message {
 
     public void setPostId(String postId) {
         this.postId = postId;
+    }
+
+    public String getAuthor() {
+        return author;
+    }
+
+    public void setAuthor(String author) {
+        this.author = author;
     }
 
     public DocumentReference getPostRef() {
