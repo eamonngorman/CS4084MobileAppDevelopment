@@ -157,10 +157,11 @@ public class MainActivity extends AppCompatActivity {
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
                         for (QueryDocumentSnapshot document : task.getResult()) {
-
+                            // Get the timestamp of the document
                             long timestamp = document.getLong("timestamp");
                             long currentTime = System.currentTimeMillis();
                             long timeDifference = currentTime - timestamp;
+                            // If the message is older than 7 days, delete it
                             if (timeDifference > 7 * 24 * 60 * 60 * 1000) {
                                 document.getReference().update("deleted", true);
                             }
