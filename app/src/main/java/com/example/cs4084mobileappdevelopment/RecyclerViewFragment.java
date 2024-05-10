@@ -131,7 +131,7 @@ public class RecyclerViewFragment extends Fragment {
 
                                     if (distanceInM <= radiusInM) {
                                         // Convert document to Message object
-                                        Message message = new Message(doc.getId(), doc.getString("message"), lat, lng, doc.getString("category"));
+                                        Message message = new Message(doc.getId(), doc.getString("message"), lat, lng, doc.getString("category"), doc.getString("author"));
                                         matchingMessages.add(message);
                                     }
                                 }

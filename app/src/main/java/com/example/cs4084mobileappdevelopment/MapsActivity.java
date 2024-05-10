@@ -192,6 +192,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 if (documentSnapshot != null) {
                     String markerTitle = "Post";
                     String markerMessage = documentSnapshot.getString("message");
+                    String author = documentSnapshot.getString("author");
                     long timestamp = documentSnapshot.getLong("timestamp");
                     double lat = documentSnapshot.getDouble("latitude");
                     double lng = documentSnapshot.getDouble("longitude");
@@ -210,7 +211,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     String location = city + ", " + country;
                     String postId = documentSnapshot.getId();
 
-                    MapMessageFragment newFragment = MapMessageFragment.newInstance(markerTitle, markerMessage, timestamp, location, postId);
+                    MapMessageFragment newFragment = MapMessageFragment.newInstance(markerTitle, markerMessage, timestamp, location, postId, author);
 
                     getSupportFragmentManager().beginTransaction()
                             .replace(R.id.message_container, newFragment)

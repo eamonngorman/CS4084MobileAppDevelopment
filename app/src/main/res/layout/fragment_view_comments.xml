@@ -26,7 +26,7 @@
             android:layout_marginLeft="8dp"
             android:layout_marginTop="16dp"
             android:layout_marginRight="8dp"
-            android:layout_marginBottom="8dp" />
+            android:layout_marginBottom="61dp" />
 
         <LinearLayout
             android:id="@+id/button_container"
@@ -36,7 +36,8 @@
             android:layout_marginBottom="10dp"
             android:layout_marginLeft="10dp"
             android:layout_marginRight="10dp"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            app:layout_constraintTop_toBottomOf="@id/comments_recycler_view">
 
             <Button
                 android:id="@+id/post_comment_button"
@@ -55,13 +56,6 @@
                 android:layout_weight="1"
                 android:text="Close"
                 android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
-
-            <!--            <Button-->
-            <!--                android:id="@+id/buttonSubmit"-->
-            <!--                android:layout_width="match_parent"-->
-            <!--                android:layout_height="50dp"-->
-            <!--                android:layout_marginTop="16dp"-->
-            <!--                android:text="Submit" />-->
 
 
         </LinearLayout>

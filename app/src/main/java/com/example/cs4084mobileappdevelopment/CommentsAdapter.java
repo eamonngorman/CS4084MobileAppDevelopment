@@ -8,6 +8,9 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,10 +33,11 @@ public class CommentsAdapter extends RecyclerView.Adapter<CommentsAdapter.Commen
     @Override
     public void onBindViewHolder(@NonNull CommentViewHolder holder, int position) {
         Comment comment = comments.get(position);
+//        setAuthToUsername(comment);
 //        holder.bind(comment);
         holder.commentTextView.setText(comment.getComment());
         holder.commentTimeView.setText("Posted:" + getTimeAgo(comment.getTimestamp()));
-        holder.commentAuthorView.setText("By:" + comment.getAuthor());
+        holder.commentAuthorView.setText("By: " + comment.getAuthor());
 
     }
 
@@ -70,4 +74,6 @@ public class CommentsAdapter extends RecyclerView.Adapter<CommentsAdapter.Commen
             return (timeDifference / 86400000) + " days ago";
         }
     }
+
+
 }

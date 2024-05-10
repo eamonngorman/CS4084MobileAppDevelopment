@@ -16,6 +16,11 @@ import androidx.fragment.app.FragmentTransaction;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
+import okhttp3.*;
+import java.io.IOException;
+
+
+
 public class TaskbarFragment extends Fragment {
 
     FirebaseAuth auth;
@@ -71,6 +76,7 @@ public class TaskbarFragment extends Fragment {
             public void onClick(View view) {
                 Intent intent = new Intent(getActivity(), MainActivity.class);
                 startActivity(intent);
+
             }
         });
 
@@ -86,4 +92,6 @@ public class TaskbarFragment extends Fragment {
 
         return view;
     }
+
+
 }

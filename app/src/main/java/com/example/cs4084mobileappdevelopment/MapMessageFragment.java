@@ -22,12 +22,7 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
-import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
-import androidx.fragment.app.FragmentContainerView;
-
-import com.example.cs4084mobileappdevelopment.MapMessageFragment;
-import com.example.cs4084mobileappdevelopment.R;
 
 
 public class MapMessageFragment extends Fragment {
@@ -36,17 +31,19 @@ public class MapMessageFragment extends Fragment {
     private static final String ARG_MARKER_SNIPPET = "marker_snippet";
     private static final String ARG_TIMESTAMP = "timestamp";
     private static final String ARG_LOCATION = "location";
+    private static final String ARG_AUTHOR = "author";
 
     public MapMessageFragment() {
     }
 
-    public static MapMessageFragment newInstance(String markerTitle, String markerSnippet, long timestamp, String location, String postId) {
+    public static MapMessageFragment newInstance(String markerTitle, String markerSnippet, long timestamp, String location, String postId, String author) {
         MapMessageFragment fragment = new MapMessageFragment();
         Bundle args = new Bundle();
         args.putString(ARG_MARKER_TITLE, markerTitle);
         args.putString(ARG_MARKER_SNIPPET, markerSnippet);
         args.putLong(ARG_TIMESTAMP, timestamp);
         args.putString(ARG_LOCATION, location);
+        args.putString(ARG_AUTHOR, author);
         args.putString("postId", postId);
         fragment.setArguments(args);
         return fragment;
@@ -113,6 +110,7 @@ public class MapMessageFragment extends Fragment {
         String markerTitle = args.getString(ARG_MARKER_TITLE);
         String location = args.getString(ARG_LOCATION);
         String markerMessage = args.getString(ARG_MARKER_SNIPPET);
+        String author = args.getString(ARG_AUTHOR);
 
         // Getting how long ago the post was
         long timestamp = args.getLong(ARG_TIMESTAMP);
@@ -130,6 +128,9 @@ public class MapMessageFragment extends Fragment {
 
         TextView messageTextView = view.findViewById(R.id.message);
         messageTextView.setText(markerMessage);
+
+        TextView authorTextView = view.findViewById(R.id.author_text);
+        authorTextView.setText("By : " + author);
     }
 
     private void setButtonClickListeners(Button closeButton, ImageButton upvoteButton, ImageButton downvoteButton, DocumentReference postRef, String userId, VoteHandler voteHandler, Button commentButton) {

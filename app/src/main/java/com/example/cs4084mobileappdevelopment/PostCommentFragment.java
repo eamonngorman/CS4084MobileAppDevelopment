@@ -1,11 +1,13 @@
 package com.example.cs4084mobileappdevelopment;
 
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
@@ -26,7 +28,6 @@ public class PostCommentFragment extends Fragment {
     FirebaseAuth auth;
     FirebaseUser user;
 
-
     private EditText commentEditText;
 
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
@@ -42,27 +43,39 @@ public class PostCommentFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+            Bundle savedInstanceState) {
 
         View view = inflater.inflate(R.layout.fragment_comment, container, false);
 
         auth = FirebaseAuth.getInstance();
         user = auth.getCurrentUser();
 
-
         commentEditText = view.findViewById(R.id.comment_edit_text);
         Button postCommentButton = view.findViewById(R.id.comment_button);
         Button closeButton = view.findViewById(R.id.close_comment_post);
 
-
         postCommentButton.setOnClickListener(new View.OnClickListener() {
+
+
+
             @Override
             public void onClick(View v) {
 
                 String commentText = commentEditText.getText().toString();
-//                String postId = getArguments().getString("postId");
 
-                CommentHandler.postComment(commentText, postId);
+                if (TextUtils.isEmpty(commentText)) {
+                    Toast.makeText(getActivity(), "Enter Message", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                UserNameHandler un = new UserNameHandler();
+                un.getUserName(user.getUid(), new UserNameHandler.QueryCallbackString() {
+                    @Override
+                    public void onQueryCompletedString(String username) {
+                        CommentHandler.postComment(commentText, postId, username);
+                    }
+                });
+
                 if (getFragmentManager() != null) {
                     getFragmentManager().beginTransaction().remove(PostCommentFragment.this).commit();
                 }
