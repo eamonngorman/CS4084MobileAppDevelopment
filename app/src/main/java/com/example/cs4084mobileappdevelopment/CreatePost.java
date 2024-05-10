@@ -36,6 +36,7 @@ public class CreatePost extends Fragment {
     EditText editTextMessage;
     Button buttonLogin;
     Spinner spinnerCategory;
+    String postId;
 
     FirebaseFirestore db = FirebaseFirestore.getInstance();
 
@@ -45,7 +46,8 @@ public class CreatePost extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
+
+
         return inflater.inflate(R.layout.fragment_create_post, container, false);
     }
 
@@ -57,6 +59,17 @@ public class CreatePost extends Fragment {
         buttonLogin = view.findViewById(R.id.buttonSubmit);
         spinnerCategory = view.findViewById(R.id.spinnerCategory);
         Button buttonCancel = view.findViewById(R.id.buttonCancel);
+        Bundle bundle = getArguments();
+        if (bundle != null) {
+            this.postId = bundle.getString("messageId");
+            String message = bundle.getString("message");
+            editTextMessage.setText(message);
+            String category = bundle.getString("category");
+            ArrayAdapter<CharSequence> adapter = (ArrayAdapter<CharSequence>) spinnerCategory.getAdapter();
+            int position = adapter.getPosition(category);
+            spinnerCategory.setSelection(position);
+            String timestamp = bundle.getString("time");
+        }
 
 
         buttonCancel.setOnClickListener(new View.OnClickListener() {
@@ -153,36 +166,52 @@ public class CreatePost extends Fragment {
         String geohash = GeoHash.geoHashStringWithCharacterPrecision(latitude, longitude, 12);
 
         postData.put("geoHash", geohash);
+        if (postId != null) {
+            db.collection("messages").document(postId)
+                    .update(postData)
+                    .addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void aVoid) {
+                            Toast.makeText(getActivity(), "Message updated in Firestore", Toast.LENGTH_SHORT).show();
+                            getActivity().getSupportFragmentManager().beginTransaction().remove(CreatePost.this).commit();
+                        }
+                    })
+                    .addOnFailureListener(e -> {
+                        Toast.makeText(getActivity(), "Error updating message in Firestore", Toast.LENGTH_SHORT).show();
+                        Log.e("Firestore", "Error updating message in Firestore", e);
+                    });
+        } else {
 
-        db.collection("messages")
-                .add(postData)
-                .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
-                    @Override
-                    public void onSuccess(DocumentReference documentReference) {
-                        Toast.makeText(getActivity(), "Message posted to Firestore", Toast.LENGTH_SHORT).show();
+            db.collection("messages")
+                    .add(postData)
+                    .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                        @Override
+                        public void onSuccess(DocumentReference documentReference) {
+                            Toast.makeText(getActivity(), "Message posted to Firestore", Toast.LENGTH_SHORT).show();
 
-                        Map<String, Object> initialVoteCount = new HashMap<>();
-                        initialVoteCount.put("postId", documentReference.getId());
-                        initialVoteCount.put("count", 0);
+                            Map<String, Object> initialVoteCount = new HashMap<>();
+                            initialVoteCount.put("postId", documentReference.getId());
+                            initialVoteCount.put("count", 0);
 
-                        Log.i("Firestore", "Document ID: " + documentReference.getId());
+                            Log.i("Firestore", "Document ID: " + documentReference.getId());
 
-                        db.collection("upvotes").document(documentReference.getId()).set(initialVoteCount)
-                                .addOnFailureListener(e -> {
-                                    Log.e("Firestore", "Error creating document in upvotes collection", e);
-                                });
+                            db.collection("upvotes").document(documentReference.getId()).set(initialVoteCount)
+                                    .addOnFailureListener(e -> {
+                                        Log.e("Firestore", "Error creating document in upvotes collection", e);
+                                    });
 
-                        db.collection("downvotes").document(documentReference.getId()).set(initialVoteCount)
-                                .addOnFailureListener(e -> {
-                                    Log.e("Firestore", "Error creating document in downvotes collection", e);
-                                });
-                        getActivity().getSupportFragmentManager().beginTransaction().remove(CreatePost.this).commit();
-                    }
+                            db.collection("downvotes").document(documentReference.getId()).set(initialVoteCount)
+                                    .addOnFailureListener(e -> {
+                                        Log.e("Firestore", "Error creating document in downvotes collection", e);
+                                    });
+                            getActivity().getSupportFragmentManager().beginTransaction().remove(CreatePost.this).commit();
+                        }
 
-    })
-                .addOnFailureListener(e -> {
-                    Toast.makeText(getActivity(), "Error posting message to Firestore", Toast.LENGTH_SHORT).show();
-                    Log.e("Firestore", "Error posting message to Firestore", e);
-                });
+                    })
+                    .addOnFailureListener(e -> {
+                        Toast.makeText(getActivity(), "Error posting message to Firestore", Toast.LENGTH_SHORT).show();
+                        Log.e("Firestore", "Error posting message to Firestore", e);
+                    });
+        }
     }
 }
