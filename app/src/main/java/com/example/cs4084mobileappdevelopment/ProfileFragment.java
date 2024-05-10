@@ -43,6 +43,7 @@ public class ProfileFragment extends Fragment {
     long totalVotes = 0;
 
     private String getTimeAgo(long timeDifference) {
+        //get how long ago the post was made. in milliseconds so had to be converted to minutes, hours or days
         if (timeDifference < 60000) {
             return "just now";
         } else if (timeDifference < 3600000) {
@@ -57,8 +58,10 @@ public class ProfileFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_profile, container, false);
         Button closeButton = view.findViewById(R.id.buttonClose);
+        // Close the profile fragment when the close button is pressed
         closeButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -96,6 +99,7 @@ public class ProfileFragment extends Fragment {
             private FragmentManager fragmentManager;
             private Fragment fragment;
 
+            // Constructor for the MessageAdapter class
             MessageAdapter(List<String> messagesList, List<String> categoriesList, List<String> timeList, FragmentManager fragmentManager, Fragment fragment) {
                 this.messagesList = messagesList;
                 this.categoriesList = categoriesList;
@@ -104,6 +108,7 @@ public class ProfileFragment extends Fragment {
                 this.fragment = fragment;
             }
 
+            // Create a new view holder
             @NonNull
             @Override
             public MessageViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -112,6 +117,7 @@ public class ProfileFragment extends Fragment {
                 return new MessageViewHolder(itemView);
             }
 
+            // Bind the view holder to the data
             @Override
             public void onBindViewHolder(@NonNull MessageViewHolder holder, int position) {
                 String message = messagesList.get(position);
@@ -120,6 +126,7 @@ public class ProfileFragment extends Fragment {
                 holder.messageTextView.setText(message);
                 holder.categoryTextView.setText(category);
                 holder.timeTextView.setText(time);
+                // Set the onClickListeners for the edit and delete buttons
                 holder.editButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -128,13 +135,16 @@ public class ProfileFragment extends Fragment {
                         String message = messagesList.get(adapterPosition);
                         String category = categoriesList.get(adapterPosition);
                         String time = timeList.get(adapterPosition);
+                        // Create a new CreatePost fragment and pass the message details to it
                         CreatePost createPost = new CreatePost();
+                        // Pass the message using a bundle
                         Bundle bundle = new Bundle();
                         bundle.putString("messageId", messageId);
                         bundle.putString("message", message);
                         bundle.putString("category", category);
                         bundle.putString("time", time);
                         createPost.setArguments(bundle);
+                        // Replace the current fragment with the CreatePost fragment
                         FragmentTransaction ft = fragmentManager.beginTransaction();
                         ft.replace(R.id.fragment_container, createPost);
                         ft.commit();
@@ -145,12 +155,14 @@ public class ProfileFragment extends Fragment {
                     public void onClick(View v) {
                         int adapterPosition = holder.getAdapterPosition();
                         String messageId = messageIds.get(adapterPosition);
+                        // Delete the message from the database
                         db.collection("messages").document(messageId)
                                 .update("deleted", true)
                                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                                     @Override
                                     public void onSuccess(Void aVoid) {
                                         Log.d("ProfileFragment", "deleted");
+                                        // Refresh the fragment
                                         FragmentTransaction ft = fragmentManager.beginTransaction();
                                         ft.replace(R.id.fragment_container, new ProfileFragment());
                                         ft.commit();
@@ -180,6 +192,7 @@ public class ProfileFragment extends Fragment {
 
                 MessageViewHolder(View view) {
                     super(view);
+                    // Get the views from the layout
                     messageTextView = view.findViewById(R.id.messageText);
                     categoryTextView = view.findViewById(R.id.categoryText);
                     timeTextView = view.findViewById(R.id.timeText);
@@ -189,16 +202,18 @@ public class ProfileFragment extends Fragment {
             }
         }
 
+        // Create a new MessageAdapter and set it to the RecyclerView
         adapter = new MessageAdapter(messagesList, categoriesList, timeList, getParentFragmentManager(), this);
         postsRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         postsRecyclerView.setAdapter(adapter);
 
-
+        // Get the messages from the database where the userid is the same as the logged in users id
         db.collection("messages")
                 .whereEqualTo("userId", user.getUid())
                 .get()
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
+                        // Loop through the documents and add the message, category and time to the lists
                         for (QueryDocumentSnapshot document : task.getResult()) {
                             String message = document.getString("message");
                             String category = document.getString("category");
@@ -209,17 +224,20 @@ public class ProfileFragment extends Fragment {
                             messagesList.add(message);
                             messageIds.add(document.getId());
                             timeList.add(time);
+                            // If the message has been deleted, add "DELETED" to the categories list, otherwise add the actual category
                             if (deleted) {
                                 categoriesList.add("DELETED");
                             } else {
                                 categoriesList.add(category);
                             }
                         }
+                        // Notify the adapter that the data has changed
                         adapter.notifyDataSetChanged();
                         Log.d("ProfileFragment", "userID: " + user.getUid());
                         Log.d("ProfileFragment", "messagesList: " + messagesList);
                         Log.d("ProfileFragment", "messageIds: " + messageIds);
 
+                        // Get the upvotes and downvotes for each message
                         for (String messageId : messageIds) {
                             Log.d("ProfileFragment", "messageId: " + messageId);
                             db.collection("upvotes")
@@ -249,6 +267,7 @@ public class ProfileFragment extends Fragment {
                                         } else {
                                             Log.d("ProfileFragment", "Error getting downvotes");
                                         }
+                                        // Set the total votes text view to the total votes (upvotes - downvotes)
                                         votesTextView.setText("Total Votes: " + totalVotes);
                                     });
 

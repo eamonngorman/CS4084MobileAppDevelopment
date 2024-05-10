@@ -60,6 +60,7 @@ public class CreatePost extends Fragment {
         spinnerCategory = view.findViewById(R.id.spinnerCategory);
         Button buttonCancel = view.findViewById(R.id.buttonCancel);
         Bundle bundle = getArguments();
+        // If there is data in the bundle, then we are editing a post
         if (bundle != null) {
             this.postId = bundle.getString("messageId");
             String message = bundle.getString("message");
@@ -166,6 +167,7 @@ public class CreatePost extends Fragment {
         String geohash = GeoHash.geoHashStringWithCharacterPrecision(latitude, longitude, 12);
 
         postData.put("geoHash", geohash);
+        // If we are editing a post, update the existing document. it used the postId from the bundle to check if there is a post
         if (postId != null) {
             db.collection("messages").document(postId)
                     .update(postData)
@@ -173,6 +175,7 @@ public class CreatePost extends Fragment {
                         @Override
                         public void onSuccess(Void aVoid) {
                             Toast.makeText(getActivity(), "Message updated in Firestore", Toast.LENGTH_SHORT).show();
+                            // Close the fragment
                             getActivity().getSupportFragmentManager().beginTransaction().remove(CreatePost.this).commit();
                         }
                     })
