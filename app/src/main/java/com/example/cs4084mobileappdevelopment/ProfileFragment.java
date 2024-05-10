@@ -120,6 +120,26 @@ public class ProfileFragment extends Fragment {
                 holder.messageTextView.setText(message);
                 holder.categoryTextView.setText(category);
                 holder.timeTextView.setText(time);
+                holder.editButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        int adapterPosition = holder.getAdapterPosition();
+                        String messageId = messageIds.get(adapterPosition);
+                        String message = messagesList.get(adapterPosition);
+                        String category = categoriesList.get(adapterPosition);
+                        String time = timeList.get(adapterPosition);
+                        CreatePost createPost = new CreatePost();
+                        Bundle bundle = new Bundle();
+                        bundle.putString("messageId", messageId);
+                        bundle.putString("message", message);
+                        bundle.putString("category", category);
+                        bundle.putString("time", time);
+                        createPost.setArguments(bundle);
+                        FragmentTransaction ft = fragmentManager.beginTransaction();
+                        ft.replace(R.id.fragment_container, createPost);
+                        ft.commit();
+                    }
+                });
                 holder.deleteButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -156,6 +176,7 @@ public class ProfileFragment extends Fragment {
                 TextView categoryTextView;
                 TextView timeTextView;
                 Button deleteButton;
+                Button editButton;
 
                 MessageViewHolder(View view) {
                     super(view);
@@ -163,6 +184,7 @@ public class ProfileFragment extends Fragment {
                     categoryTextView = view.findViewById(R.id.categoryText);
                     timeTextView = view.findViewById(R.id.timeText);
                     deleteButton = view.findViewById(R.id.deleteButton);
+                    editButton = view.findViewById(R.id.editButton);
                 }
             }
         }

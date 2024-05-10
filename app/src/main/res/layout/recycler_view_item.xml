@@ -37,6 +37,15 @@
         style="@style/buttonStyle"
         android:layout_width="match_parent"
         android:layout_height="48dp"
+        android:layout_marginBottom="10dp"
         android:text="Delete Post"
+        android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
+
+    <Button
+        android:id="@+id/editButton"
+        style="@style/buttonStyle"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:text="Edit Post"
         android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
 </LinearLayout>
